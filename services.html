@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Services | SkillToFreelance</title>
+    <style>
+      :root {
+        --bg: #f4f7fb;
+        --surface: #ffffff;
+        --surface-2: #eef4ff;
+        --text: #14213d;
+        --muted: #5f6b7a;
+        --accent: #2563eb;
+        --accent-2: #3b82f6;
+        --border: #dce4f0;
+        --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+      }
+      body.dark {
+        --bg: #07111f;
+        --surface: #101b2b;
+        --surface-2: #162235;
+        --text: #f8fafc;
+        --muted: #9fb0c9;
+        --accent: #38bdf8;
+        --accent-2: #818cf8;
+        --border: #243447;
+        --shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: Inter, Segoe UI, Arial, sans-serif; background: linear-gradient(135deg, var(--surface-2), var(--bg)); color: var(--text)); line-height: 1.6; }
+      a { color: inherit; }
+      .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+      .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+      .brand { font-size: 1.1rem; font-weight: 800; }
+      .nav-links { display: flex; gap: 14px; flex-wrap: wrap; }
+      .nav-links a { color: var(--muted); text-decoration: none; font-weight: 600; }
+      .nav-links a:hover { color: var(--text); }
+      .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 18px; box-shadow: var(--shadow); }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+      .card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 16px; padding: 14px; }
+      .muted { color: var(--muted); }
+      .theme-btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-weight: 700; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="topbar">
+        <div class="brand">SkillToFreelance</div>
+        <nav class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="roadmap.html">Roadmap</a>
+          <a href="services.html">Services</a>
+          <a href="login.html">Login</a>
+        </nav>
+        <button class="theme-btn" id="themeToggle" type="button">🌙 Dark</button>
+      </header>
+
+      <section class="panel">
+        <h1 style="margin-top:0">Freelance services to start with</h1>
+        <p class="muted">Simple services that are practical, low-risk, and easy to test as a beginner.</p>
+        <div class="grid">
+          <div class="card"><h3>Design support</h3><p class="muted">Logo, social posts, presentation cleanup.</p></div>
+          <div class="card"><h3>Video editing</h3><p class="muted">Short reels, basic edits, caption styling.</p></div>
+          <div class="card"><h3>Content writing</h3><p class="muted">Blog drafts, captions, product descriptions.</p></div>
+          <div class="card"><h3>Automation setup</h3><p class="muted">Simple forms, workflow setup, small automations.</p></div>
+        </div>
+      </section>
+      <div class="footer" style="margin-top:18px;color:var(--muted);font-size:.95rem;">Contact: <a href="mailto:contact@skilltofreelance.app">contact@skilltofreelance.app</a> · <a href="terms.html">Terms & Privacy</a></div>
+      <div class="footer" style="margin-top:6px;color:var(--muted);font-size:.95rem;">Designed by Ajay @2026</div>
+    </div>
+
+    <script>
+      const themeToggle = document.getElementById('themeToggle');
+      function applyTheme(mode) {
+        document.body.classList.toggle('dark', mode === 'dark');
+        themeToggle.textContent = mode === 'dark' ? '☀️ Light' : '🌙 Dark';
+        localStorage.setItem('skill-theme', mode);
+      }
+      applyTheme(localStorage.getItem('skill-theme') || 'light');
+      themeToggle.addEventListener('click', () => applyTheme(document.body.classList.contains('dark') ? 'light' : 'dark'));
+    </script>
+  </body>
+</html>

@@ -3,127 +3,181 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Freelance Career Starter</title>
+    <meta name="description" content="A professional freelance starter platform with a smart roadmap assistant and theme switcher." />
+    <title>SkillToFreelance</title>
     <style>
       :root {
+        --bg: #f4f7fb;
+        --surface: #ffffff;
+        --surface-2: #eef4ff;
+        --text: #14213d;
+        --muted: #5f6b7a;
+        --accent: #2563eb;
+        --accent-2: #3b82f6;
+        --border: #dce4f0;
+        --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+      }
+      body.dark {
         --bg: #07111f;
-        --panel: #101a2b;
-        --card: #162235;
+        --surface: #101b2b;
+        --surface-2: #162235;
         --text: #f8fafc;
         --muted: #9fb0c9;
         --accent: #38bdf8;
-        --accent2: #818cf8;
+        --accent-2: #818cf8;
         --border: #243447;
+        --shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
       }
-
       * { box-sizing: border-box; }
       body {
         margin: 0;
         font-family: Inter, Segoe UI, Arial, sans-serif;
-        background: linear-gradient(135deg, var(--bg), #13253d);
+        background: linear-gradient(135deg, var(--surface-2), var(--bg));
         color: var(--text);
         line-height: 1.6;
+        transition: background 0.25s ease, color 0.25s ease;
       }
-
       a { color: inherit; }
       .wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
-      .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 24px; }
-      .brand { font-size: 1.1rem; font-weight: 800; }
-      .pill { display: inline-block; padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--accent); }
-      .hero { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; align-items: center; background: linear-gradient(135deg, rgba(56,189,248,.16), rgba(129,140,248,.16)); border: 1px solid var(--border); border-radius: 24px; padding: 28px; box-shadow: 0 16px 40px rgba(0,0,0,.25); }
-      .hero h1 { font-size: clamp(2rem, 4vw, 3rem); margin: 0 0 12px; }
-      .hero p { color: var(--muted); font-size: 1.04rem; }
-      .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
-      .btn { display: inline-block; padding: 12px 14px; border-radius: 999px; border: none; font-weight: 700; cursor: pointer; text-decoration: none; }
-      .btn-primary { background: linear-gradient(90deg, var(--accent), var(--accent2)); color: white; }
-      .btn-secondary { background: rgba(255,255,255,.08); color: white; border: 1px solid var(--border); }
-      .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-top: 20px; }
-      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-      .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
-      .card h3 { margin-top: 0; margin-bottom: 6px; }
+      .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
+      .brand-block { display: flex; flex-direction: column; gap: 4px; }
+      .brand { font-size: 1.18rem; font-weight: 800; letter-spacing: 0.02em; }
+      .brand-sub { color: var(--muted); font-size: 0.92rem; }
+      .nav-links { display: flex; gap: 16px; flex-wrap: wrap; }
+      .nav-links a { text-decoration: none; color: var(--muted); font-weight: 600; }
+      .nav-links a:hover { color: var(--text); }
+      .topbar-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+      .theme-btn, .btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; border-radius: 999px; border: 1px solid var(--border); font-weight: 700; cursor: pointer; text-decoration: none; transition: transform 0.16s ease, opacity 0.16s ease; }
+      .theme-btn { background: var(--surface); color: var(--text); }
+      .btn:hover, .theme-btn:hover { transform: translateY(-1px); }
+      .btn-primary { background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: white; border-color: transparent; }
+      .btn-secondary { background: var(--surface); color: var(--text); }
+      .hero { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 24px; box-shadow: none; }
+      .eyebrow { display: inline-block; margin-bottom: 10px; color: var(--accent); font-weight: 700; font-size: 0.92rem; letter-spacing: 0.08em; text-transform: uppercase; }
+      .hero h1 { font-size: clamp(2rem, 4vw, 3rem); margin: 0 0 10px; line-height: 1.1; }
+      .hero p { color: var(--muted); font-size: 1.02rem; max-width: 700px; }
+      .hero-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+      .hero-badges span { padding: 7px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-size: 0.88rem; }
+      .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+      .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 16px; margin-top: 14px; box-shadow: none; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+      .card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 14px; padding: 12px; }
+      .card h3 { margin-top: 0; margin-bottom: 7px; }
       .meta { color: var(--accent); font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; }
       .muted { color: var(--muted); }
       .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-      .stat { background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; }
+      .stat { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; }
       .stat strong { display: block; font-size: 1.2rem; }
       form { display: grid; gap: 10px; }
-      .input { width: 100%; padding: 12px 13px; border-radius: 10px; border: 1px solid var(--border); background: #0b1320; color: white; }
-      .footer { text-align: center; padding: 24px 0 10px; color: var(--muted); }
+      .input, select { width: 100%; padding: 12px 13px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); }
+      .assistant-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      .assistant-result { min-height: 320px; }
+      .result-list { display: grid; gap: 10px; margin-top: 10px; }
+      .result-item { padding: 10px 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); }
+      .result-item strong { display: block; margin-bottom: 4px; }
+      .empty-state { color: var(--muted); padding: 10px 0; }
+      .print-area { display: none; }
+      .footer { text-align: center; padding: 28px 0 10px; color: var(--muted); }
       .hidden { display: none !important; }
-      @media (max-width: 840px) { .hero { grid-template-columns: 1fr; } .stats { grid-template-columns: 1fr; } }
+      .tiny { font-size: 0.9rem; color: var(--muted); }
+      @media (max-width: 880px) { .hero, .assistant-grid { grid-template-columns: 1fr; } .stats { grid-template-columns: 1fr; } }
+      @media print {
+        body * { visibility: hidden; }
+        .print-area, .print-area * { visibility: visible; }
+        .print-area { display: block; position: absolute; left: 0; top: 0; width: 100%; padding: 24px; }
+      }
     </style>
   </head>
   <body>
     <div class="wrap">
-      <div class="topbar">
-        <div>
-          <div class="brand">Freelance Career Starter</div>
-          <span class="pill">India-focused • login-ready • data-backed</span>
+      <header class="topbar">
+        <div class="brand-block">
+          <div class="brand">SkillToFreelance</div>
+          <div class="brand-sub">Professional freelance career access</div>
         </div>
-        <div id="authBox">
-          <a class="btn btn-secondary" href="login.html" id="loginLink">Login / Signup</a>
-          <button class="btn btn-secondary hidden" id="logoutBtn">Logout</button>
+        <nav class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="roadmap.html">Roadmap</a>
+          <a href="services.html">Services</a>
+          <a href="login.html">Login</a>
+        </nav>
+        <div class="topbar-actions">
+          <button class="theme-btn" id="themeToggle" type="button">🌙 Dark</button>
+          <a class="btn btn-primary" href="login.html" id="loginLink">Login / Signup</a>
+          <button class="btn btn-secondary hidden" id="logoutBtn" type="button">Logout</button>
         </div>
-      </div>
+      </header>
 
-      <section class="hero">
+      <section id="home" class="hero" style="text-align:center;">
         <div>
-          <h1>Turn your skill into real freelance income.</h1>
-          <p>Visitors can sign up, request help, and access practical freelance ideas, a 7-day learning roadmap, and fast-client advice in one polished experience.</p>
-          <div class="actions">
-            <a class="btn btn-primary" href="login.html">Get Started</a>
-            <a class="btn btn-secondary" href="#services">Explore Services</a>
+          <div class="eyebrow">Build your freelance career</div>
+          <h1 style="margin-bottom:16px">Professional tools, clear guidance, and a fast route from skill to client.</h1>
+          <p style="max-width:700px; margin:0 auto 24px; color:var(--muted);">Explore the platform freely: Home, About, Roadmap, and Services are available without login. Sign in only when you are ready to save your profile and access personalized support.</p>
+          <div class="actions" style="justify-content:center;">
+            <a class="btn btn-primary" href="login.html">Login / Signup</a>
+            <a class="btn btn-secondary" href="about.html">Learn More</a>
           </div>
         </div>
-        <div class="panel" id="authPanel">
-          <h3>Quick access</h3>
-          <p class="muted">Login or sign up to save your request and view a live dashboard.</p>
-          <form id="leadForm">
-            <input class="input" id="name" placeholder="Your name" required />
-            <input class="input" id="goal" placeholder="What do you want help with?" required />
-            <button class="btn btn-primary" type="submit">Save My Goal</button>
-          </form>
-          <p id="leadMessage" class="muted" style="margin-top:8px"></p>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+          <div>
+            <h2 style="margin:0">Why SkillToFreelance?</h2>
+            <p style="margin:8px 0 0;color:var(--muted);">A professional launchpad for beginner freelancers and hiring-focused career builders.</p>
+          </div>
+        </div>
+        <div class="grid" style="margin-top:16px;">
+          <div class="card"><h3>Fast start</h3><p class="muted">Clear steps to turn your skill into a service and reach your first clients quickly.</p></div>
+          <div class="card"><h3>Public access</h3><p class="muted">View About, Services, and Roadmap guidance without creating an account.</p></div>
+          <div class="card"><h3>Professional roadmap</h3><p class="muted">Get a practical workflow for pricing, proposals, outreach, and delivery.</p></div>
+          <div class="card"><h3>Career-ready</h3><p class="muted">Designed to support hiring-oriented freelance projects and client-winning offers.</p></div>
         </div>
       </section>
 
       <section class="panel">
-        <div class="stats" id="statsBoard">
-          <div class="stat"><strong id="usersCount">0</strong><span class="muted">Users</span></div>
-          <div class="stat"><strong id="leadsCount">0</strong><span class="muted">Requests</span></div>
-          <div class="stat"><strong id="latestGoal">—</strong><span class="muted">Latest</span></div>
-        </div>
-      </section>
-
-      <section id="services" class="panel">
-        <h2 style="margin-top:0">7 freelance earning ideas</h2>
-        <div class="grid">
-          <div class="card"><h3>Freelance Skill Specialist</h3><div class="meta">Fiverr, Upwork, Instagram</div><p class="muted">Expected earning: ₹2,000–₹10,000/project</p></div>
-          <div class="card"><h3>Skill Tutor or Coach</h3><div class="meta">UrbanPro, Instagram, WhatsApp</div><p class="muted">Expected earning: ₹300–₹1,500/hour</p></div>
-          <div class="card"><h3>Content Creator for Brands</h3><div class="meta">Instagram, LinkedIn, local agencies</div><p class="muted">Expected earning: ₹5,000–₹20,000/month</p></div>
-          <div class="card"><h3>Setup or Automation Service</h3><div class="meta">Upwork, Fiverr, local startups</div><p class="muted">Expected earning: ₹4,000–₹20,000/project</p></div>
-          <div class="card"><h3>Editor or Rework Specialist</h3><div class="meta">Fiverr, Instagram, local creators</div><p class="muted">Expected earning: ₹1,000–₹7,000/project</p></div>
-          <div class="card"><h3>Monthly Retainer Support</h3><div class="meta">Local businesses, LinkedIn, referrals</div><p class="muted">Expected earning: ₹8,000–₹30,000/month</p></div>
-          <div class="card"><h3>Service for Students and Founders</h3><div class="meta">LinkedIn, college groups, Telegram</div><p class="muted">Expected earning: ₹3,000–₹15,000/project</p></div>
+        <h2 style="margin-top:0">Public Career Resources</h2>
+        <p class="muted">This site is a career and hiring portal, not a restricted app. You can browse the platform and review services without signing in.</p>
+        <div class="grid" style="margin-top:16px;">
+          <div class="card"><h3>About</h3><p class="muted">Read the mission and how we support freelance career growth.</p></div>
+          <div class="card"><h3>Roadmap</h3><p class="muted">See the planning tools and timeline for building your first client offer.</p></div>
+          <div class="card"><h3>Services</h3><p class="muted">Explore service categories, package ideas, and how to position yourself for hire.</p></div>
+          <div class="card"><h3>Support</h3><p class="muted">Use the login page when you want to save progress and access personalized features.</p></div>
         </div>
       </section>
 
       <section class="panel">
-        <h2 style="margin-top:0">7-day learning plan</h2>
-        <div class="card">
-          <p class="muted">Day 1: Choose one niche and define 3 services.<br/>Day 2: Build 3 sample projects.<br/>Day 3: Set up profiles on Fiverr, Upwork, LinkedIn, or Instagram.<br/>Day 4: Learn client communication and pricing.<br/>Day 5: Create starter and premium packages.<br/>Day 6: Contact 20 potential clients.<br/>Day 7: Deliver one project and collect feedback.</p>
+        <h2 style="margin-top:0">How It Works</h2>
+        <div class="grid" style="margin-top:16px;">
+          <div class="card"><strong>1. Review</strong><p class="muted">Browse the platform and understand the freelance career process.</p></div>
+          <div class="card"><strong>2. Prepare</strong><p class="muted">Choose a service, set a goal, and learn how to package your offer professionally.</p></div>
+          <div class="card"><strong>3. Act</strong><p class="muted">Sign in to save your plan, track progress, and start outreach.</p></div>
         </div>
       </section>
 
-      <div class="footer">A polished, working web experience with auth flow and stored requests.</div>
+      <div class="footer">Contact: <a href="mailto:contact@skilltofreelance.app">contact@skilltofreelance.app</a> · <a href="terms.html">Terms & Privacy</a></div>
+      <div class="footer" style="font-size:0.95rem;color:var(--muted);margin-top:6px;">Designed by Ajay @2026</div>
     </div>
 
     <script>
       const token = localStorage.getItem('freelance-token');
       const loginLink = document.getElementById('loginLink');
       const logoutBtn = document.getElementById('logoutBtn');
-      const leadForm = document.getElementById('leadForm');
-      const leadMessage = document.getElementById('leadMessage');
+      const themeToggle = document.getElementById('themeToggle');
+
+      function applyTheme(mode) {
+        document.body.classList.toggle('dark', mode === 'dark');
+        themeToggle.textContent = mode === 'dark' ? '☀️ Light' : '🌙 Dark';
+        localStorage.setItem('skill-theme', mode);
+      }
+
+      const savedTheme = localStorage.getItem('skill-theme') || 'light';
+      applyTheme(savedTheme);
+
+      themeToggle.addEventListener('click', () => {
+        applyTheme(document.body.classList.contains('dark') ? 'light' : 'dark');
+      });
 
       if (token) {
         loginLink.classList.add('hidden');
@@ -133,38 +187,6 @@
       logoutBtn.addEventListener('click', () => {
         localStorage.removeItem('freelance-token');
         location.reload();
-      });
-
-      async function loadStats() {
-        try {
-          const res = await fetch('/api/dashboard', { headers: { Authorization: token || '' } });
-          const data = await res.json();
-          if (data.ok) {
-            document.getElementById('usersCount').textContent = data.stats.users;
-            document.getElementById('leadsCount').textContent = data.stats.leads;
-            document.getElementById('latestGoal').textContent = data.stats.latest[0] ? data.stats.latest[0].goal : '—';
-          }
-        } catch (e) {}
-      }
-
-      loadStats();
-
-      leadForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!token) {
-          leadMessage.textContent = 'Please login or sign up first.';
-          return;
-        }
-        const name = document.getElementById('name').value.trim();
-        const goal = document.getElementById('goal').value.trim();
-        const res = await fetch('/api/lead', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: token },
-          body: JSON.stringify({ name, goal })
-        });
-        const data = await res.json();
-        leadMessage.textContent = data.message || 'Saved';
-        if (data.ok) leadForm.reset();
       });
     </script>
   </body>

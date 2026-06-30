@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Roadmap | SkillToFreelance</title>
+    <style>
+      :root {
+        --bg: #f4f7fb;
+        --surface: #ffffff;
+        --surface-2: #eef4ff;
+        --text: #14213d;
+        --muted: #5f6b7a;
+        --accent: #2563eb;
+        --accent-2: #3b82f6;
+        --border: #dce4f0;
+        --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+      }
+      body.dark {
+        --bg: #07111f;
+        --surface: #101b2b;
+        --surface-2: #162235;
+        --text: #f8fafc;
+        --muted: #9fb0c9;
+        --accent: #38bdf8;
+        --accent-2: #818cf8;
+        --border: #243447;
+        --shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Inter, Segoe UI, Arial, sans-serif;
+        background: linear-gradient(135deg, var(--surface-2), var(--bg));
+        color: var(--text);
+        line-height: 1.6;
+      }
+      a { color: inherit; }
+      .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+      .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+      .brand { font-size: 1.1rem; font-weight: 800; }
+      .nav-links { display: flex; gap: 14px; flex-wrap: wrap; }
+      .nav-links a { color: var(--muted); text-decoration: none; font-weight: 600; }
+      .nav-links a:hover { color: var(--text); }
+      .topbar-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+      .theme-btn, .btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; border-radius: 999px; border: 1px solid var(--border); font-weight: 700; cursor: pointer; text-decoration: none; }
+      .theme-btn { background: var(--surface); color: var(--text); }
+      .btn-primary { background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: white; border-color: transparent; }
+      .btn-secondary { background: var(--surface); color: var(--text); }
+      .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 18px; box-shadow: var(--shadow); }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      .card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 16px; padding: 14px; }
+      .muted { color: var(--muted); }
+      .input, select { width: 100%; padding: 12px 13px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+      .result-list { display: grid; gap: 10px; margin-top: 10px; }
+      .result-item { padding: 10px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); }
+      .result-item strong { display: block; margin-bottom: 4px; }
+      .print-area { display: none; }
+      .footer { text-align: center; padding: 24px 0 12px; color: var(--muted); }
+      .hidden { display: none !important; }
+      @media (max-width: 780px) { .grid { grid-template-columns: 1fr; } }
+      @media print {
+        body * { visibility: hidden; }
+        .print-area, .print-area * { visibility: visible; }
+        .print-area { display: block; position: absolute; left: 0; top: 0; width: 100%; padding: 24px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="topbar">
+        <div class="brand">SkillToFreelance</div>
+        <nav class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="about.html">About</a>
+          <a href="roadmap.html">Roadmap</a>
+          <a href="services.html">Services</a>
+          <a href="login.html">Login</a>
+        </nav>
+        <div class="topbar-actions">
+          <button class="theme-btn" id="themeToggle" type="button">🌙 Dark</button>
+          <a class="btn btn-secondary" href="login.html" id="loginLink">Login / Signup</a>
+          <button class="btn btn-secondary hidden" id="logoutBtn" type="button">Logout</button>
+        </div>
+      </header>
+
+      <section class="panel">
+        <h1 style="margin-top:0">AI roadmap assistant</h1>
+        <p class="muted">Enter your skill, goal, and experience level to build a practical roadmap for your freelance journey.</p>
+        <div class="grid">
+          <div class="card">
+            <form id="roadmapForm">
+              <label for="skillInput">Skill</label>
+              <input class="input" id="skillInput" placeholder="Example: video editing" required />
+              <label for="goalInput">Goal</label>
+              <input class="input" id="goalInput" placeholder="Example: earn first ₹5000" required />
+              <label for="levelInput">Current level</label>
+              <select id="levelInput">
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+              </select>
+              <button class="btn btn-primary" type="submit" style="margin-top:8px">Generate roadmap</button>
+            </form>
+          </div>
+          <div class="card" id="roadmapResult">
+            <div class="muted">Your personalized plan will appear here.</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="footer">A clear step-by-step freelance roadmap.</div>
+      <div class="footer" style="font-size:0.95rem;color:var(--muted);margin-top:12px;">Contact: <a href="mailto:contact@skilltofreelance.app">contact@skilltofreelance.app</a> · <a href="terms.html">Terms & Privacy</a></div>
+      <div class="footer" style="font-size:0.95rem;color:var(--muted);margin-top:6px;">Designed by Ajay @2026</div>
+    </div>
+
+    <div id="printArea" class="print-area"></div>
+
+    <script>
+      const token = localStorage.getItem('freelance-token');
+      const loginLink = document.getElementById('loginLink');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const roadmapForm = document.getElementById('roadmapForm');
+      const roadmapResult = document.getElementById('roadmapResult');
+      const themeToggle = document.getElementById('themeToggle');
+
+      function applyTheme(mode) {
+        document.body.classList.toggle('dark', mode === 'dark');
+        themeToggle.textContent = mode === 'dark' ? '☀️ Light' : '🌙 Dark';
+        localStorage.setItem('skill-theme', mode);
+      }
+      const savedTheme = localStorage.getItem('skill-theme') || 'light';
+      applyTheme(savedTheme);
+      themeToggle.addEventListener('click', () => {
+        const next = document.body.classList.contains('dark') ? 'light' : 'dark';
+        applyTheme(next);
+      });
+
+      if (token) {
+        loginLink.classList.add('hidden');
+        logoutBtn.classList.remove('hidden');
+      }
+      logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('freelance-token');
+        location.reload();
+      });
+
+      function buildRoadmap(skill, goal, level) {
+        const skillName = skill.trim() || 'your chosen skill';
+        const goalText = goal.trim() || 'your first freelance client';
+        const levelText = level === 'intermediate' ? 'intermediate' : 'beginner';
+        const steps = [
+          `Week 1: Learn the basic tools for ${skillName} and practice 1 small project every day.`,
+          `Week 2: Build 3 strong samples that show your skill clearly and professionally.`,
+          `Week 3: Create a simple offer, price it clearly, and prepare a short message for clients.`,
+          `Week 4: Contact 10 potential clients, share your work, and ask for a trial project.`,
+          `Week 5: Deliver your first project on time, collect feedback, and improve your process.`,
+          `Week 6: Turn your first success into a repeatable system for future clients and income.`
+        ];
+        const deepPlan = [
+          `Phase 1: Choose one clear niche, one promise, and one service around ${skillName}.`,
+          `Phase 2: Learn the core tools, shortcuts, and workflow for ${skillName} so your work becomes faster and cleaner.`,
+          `Phase 3: Build a mini portfolio with 3 strong examples that show your best quality and style.`,
+          `Phase 4: Create a simple offer with a clear price, timeline, and outcome so clients understand your value.`,
+          `Phase 5: Reach out to 10 potential clients, start a conversation, and offer one small entry-level project.`,
+          `Phase 6: Deliver your first result, collect feedback, improve your process, and repeat weekly.`
+        ];
+        return { skillName, goalText, levelText, steps, deepPlan, action: `Spend 45 minutes each day on practice, learning tools, and outreach for ${skillName}.` };
+      }
+
+      function renderRoadmap(roadmap) {
+        roadmapResult.innerHTML = `
+          <h3 style="margin-top:0">Your roadmap</h3>
+          <div class="result-list">
+            <div class="result-item"><strong>Skill</strong><span>${roadmap.skillName}</span></div>
+            <div class="result-item"><strong>Goal</strong><span>${roadmap.goalText}</span></div>
+            <div class="result-item"><strong>Action plan</strong><span>${roadmap.steps.map((step, index) => `<div style="margin-top:4px">${index + 1}. ${step}</div>`).join('')}</span></div>
+            <div class="result-item"><strong>Deep plan</strong><span>${roadmap.deepPlan.map((step, index) => `<div style="margin-top:4px">${index + 1}. ${step}</div>`).join('')}</span></div>
+            <div class="result-item"><strong>Daily action</strong><span>${roadmap.action}</span></div>
+            <button class="btn btn-secondary" id="downloadPdfBtn" type="button">Save as PDF</button>
+          </div>
+        `;
+        document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+          const printArea = document.getElementById('printArea');
+          printArea.innerHTML = `
+            <h1>SkillToFreelance Roadmap</h1>
+            <p><strong>Skill:</strong> ${roadmap.skillName}</p>
+            <p><strong>Goal:</strong> ${roadmap.goalText}</p>
+            <h3>Action plan</h3>
+            <ol>${roadmap.steps.map((step) => `<li>${step}</li>`).join('')}</ol>
+            <h3>Deep plan</h3>
+            <ol>${roadmap.deepPlan.map((step) => `<li>${step}</li>`).join('')}</ol>
+            <p><strong>Daily action:</strong> ${roadmap.action}</p>
+          `;
+          window.print();
+        });
+      }
+
+      roadmapForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const skill = document.getElementById('skillInput').value;
+        const goal = document.getElementById('goalInput').value;
+        const level = document.getElementById('levelInput').value;
+        renderRoadmap(buildRoadmap(skill, goal, level));
+      });
+    </script>
+  </body>
+</html>

@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "name": "aju",
+    "email": "aju@gmail.com",
+    "goal": "logo desgin",
+    "createdAt": "2026-06-30T12:34:44.449591Z"
+  },
+  {
+    "name": "pritu",
+    "email": "aju@gmail.com",
+    "goal": "Web developer",
+    "createdAt": "2026-06-30T12:35:16.045697Z"
+  }
+]
