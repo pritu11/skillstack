@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Freelance Career Starter</title>
+    <style>
+      :root {
+        --bg: #07111f;
+        --panel: #101a2b;
+        --card: #162235;
+        --text: #f8fafc;
+        --muted: #9fb0c9;
+        --accent: #38bdf8;
+        --accent2: #818cf8;
+        --border: #243447;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Inter, Segoe UI, Arial, sans-serif;
+        background: linear-gradient(135deg, var(--bg), #13253d);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      a { color: inherit; }
+      .wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
+      .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 24px; }
+      .brand { font-size: 1.1rem; font-weight: 800; }
+      .pill { display: inline-block; padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--accent); }
+      .hero { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; align-items: center; background: linear-gradient(135deg, rgba(56,189,248,.16), rgba(129,140,248,.16)); border: 1px solid var(--border); border-radius: 24px; padding: 28px; box-shadow: 0 16px 40px rgba(0,0,0,.25); }
+      .hero h1 { font-size: clamp(2rem, 4vw, 3rem); margin: 0 0 12px; }
+      .hero p { color: var(--muted); font-size: 1.04rem; }
+      .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+      .btn { display: inline-block; padding: 12px 14px; border-radius: 999px; border: none; font-weight: 700; cursor: pointer; text-decoration: none; }
+      .btn-primary { background: linear-gradient(90deg, var(--accent), var(--accent2)); color: white; }
+      .btn-secondary { background: rgba(255,255,255,.08); color: white; border: 1px solid var(--border); }
+      .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 18px; margin-top: 20px; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+      .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
+      .card h3 { margin-top: 0; margin-bottom: 6px; }
+      .meta { color: var(--accent); font-weight: 700; font-size: 0.9rem; margin-bottom: 8px; }
+      .muted { color: var(--muted); }
+      .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      .stat { background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; }
+      .stat strong { display: block; font-size: 1.2rem; }
+      form { display: grid; gap: 10px; }
+      .input { width: 100%; padding: 12px 13px; border-radius: 10px; border: 1px solid var(--border); background: #0b1320; color: white; }
+      .footer { text-align: center; padding: 24px 0 10px; color: var(--muted); }
+      .hidden { display: none !important; }
+      @media (max-width: 840px) { .hero { grid-template-columns: 1fr; } .stats { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <div>
+          <div class="brand">Freelance Career Starter</div>
+          <span class="pill">India-focused • login-ready • data-backed</span>
+        </div>
+        <div id="authBox">
+          <a class="btn btn-secondary" href="login.html" id="loginLink">Login / Signup</a>
+          <button class="btn btn-secondary hidden" id="logoutBtn">Logout</button>
+        </div>
+      </div>
+
+      <section class="hero">
+        <div>
+          <h1>Turn your skill into real freelance income.</h1>
+          <p>Visitors can sign up, request help, and access practical freelance ideas, a 7-day learning roadmap, and fast-client advice in one polished experience.</p>
+          <div class="actions">
+            <a class="btn btn-primary" href="login.html">Get Started</a>
+            <a class="btn btn-secondary" href="#services">Explore Services</a>
+          </div>
+        </div>
+        <div class="panel" id="authPanel">
+          <h3>Quick access</h3>
+          <p class="muted">Login or sign up to save your request and view a live dashboard.</p>
+          <form id="leadForm">
+            <input class="input" id="name" placeholder="Your name" required />
+            <input class="input" id="goal" placeholder="What do you want help with?" required />
+            <button class="btn btn-primary" type="submit">Save My Goal</button>
+          </form>
+          <p id="leadMessage" class="muted" style="margin-top:8px"></p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="stats" id="statsBoard">
+          <div class="stat"><strong id="usersCount">0</strong><span class="muted">Users</span></div>
+          <div class="stat"><strong id="leadsCount">0</strong><span class="muted">Requests</span></div>
+          <div class="stat"><strong id="latestGoal">—</strong><span class="muted">Latest</span></div>
+        </div>
+      </section>
+
+      <section id="services" class="panel">
+        <h2 style="margin-top:0">7 freelance earning ideas</h2>
+        <div class="grid">
+          <div class="card"><h3>Freelance Skill Specialist</h3><div class="meta">Fiverr, Upwork, Instagram</div><p class="muted">Expected earning: ₹2,000–₹10,000/project</p></div>
+          <div class="card"><h3>Skill Tutor or Coach</h3><div class="meta">UrbanPro, Instagram, WhatsApp</div><p class="muted">Expected earning: ₹300–₹1,500/hour</p></div>
+          <div class="card"><h3>Content Creator for Brands</h3><div class="meta">Instagram, LinkedIn, local agencies</div><p class="muted">Expected earning: ₹5,000–₹20,000/month</p></div>
+          <div class="card"><h3>Setup or Automation Service</h3><div class="meta">Upwork, Fiverr, local startups</div><p class="muted">Expected earning: ₹4,000–₹20,000/project</p></div>
+          <div class="card"><h3>Editor or Rework Specialist</h3><div class="meta">Fiverr, Instagram, local creators</div><p class="muted">Expected earning: ₹1,000–₹7,000/project</p></div>
+          <div class="card"><h3>Monthly Retainer Support</h3><div class="meta">Local businesses, LinkedIn, referrals</div><p class="muted">Expected earning: ₹8,000–₹30,000/month</p></div>
+          <div class="card"><h3>Service for Students and Founders</h3><div class="meta">LinkedIn, college groups, Telegram</div><p class="muted">Expected earning: ₹3,000–₹15,000/project</p></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2 style="margin-top:0">7-day learning plan</h2>
+        <div class="card">
+          <p class="muted">Day 1: Choose one niche and define 3 services.<br/>Day 2: Build 3 sample projects.<br/>Day 3: Set up profiles on Fiverr, Upwork, LinkedIn, or Instagram.<br/>Day 4: Learn client communication and pricing.<br/>Day 5: Create starter and premium packages.<br/>Day 6: Contact 20 potential clients.<br/>Day 7: Deliver one project and collect feedback.</p>
+        </div>
+      </section>
+
+      <div class="footer">A polished, working web experience with auth flow and stored requests.</div>
+    </div>
+
+    <script>
+      const token = localStorage.getItem('freelance-token');
+      const loginLink = document.getElementById('loginLink');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const leadForm = document.getElementById('leadForm');
+      const leadMessage = document.getElementById('leadMessage');
+
+      if (token) {
+        loginLink.classList.add('hidden');
+        logoutBtn.classList.remove('hidden');
+      }
+
+      logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('freelance-token');
+        location.reload();
+      });
+
+      async function loadStats() {
+        try {
+          const res = await fetch('/api/dashboard', { headers: { Authorization: token || '' } });
+          const data = await res.json();
+          if (data.ok) {
+            document.getElementById('usersCount').textContent = data.stats.users;
+            document.getElementById('leadsCount').textContent = data.stats.leads;
+            document.getElementById('latestGoal').textContent = data.stats.latest[0] ? data.stats.latest[0].goal : '—';
+          }
+        } catch (e) {}
+      }
+
+      loadStats();
+
+      leadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!token) {
+          leadMessage.textContent = 'Please login or sign up first.';
+          return;
+        }
+        const name = document.getElementById('name').value.trim();
+        const goal = document.getElementById('goal').value.trim();
+        const res = await fetch('/api/lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: token },
+          body: JSON.stringify({ name, goal })
+        });
+        const data = await res.json();
+        leadMessage.textContent = data.message || 'Saved';
+        if (data.ok) leadForm.reset();
+      });
+    </script>
+  </body>
+</html>

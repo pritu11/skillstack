@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | Freelance Career Starter</title>
+    <style>
+      :root { --bg:#07111f; --card:#101a2b; --text:#f8fafc; --muted:#9fb0c9; --accent:#38bdf8; --accent2:#818cf8; --border:#243447; }
+      *{box-sizing:border-box} body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,var(--bg),#13253d);color:var(--text);min-height:100vh;display:grid;place-items:center;padding:20px}
+      .card{width:100%;max-width:440px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;box-shadow:0 16px 40px rgba(0,0,0,.25)}
+      h1{margin-top:0;margin-bottom:8px} p{color:var(--muted)}
+      .tabs{display:flex;gap:8px;margin:16px 0}.tab{flex:1;padding:10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.04);cursor:pointer;text-align:center}
+      .tab.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:white}
+      form{display:grid;gap:10px;margin-top:12px} input{padding:12px 13px;border-radius:10px;border:1px solid var(--border);background:#0b1320;color:white}
+      button{padding:12px 14px;border:none;border-radius:10px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:white;font-weight:700;cursor:pointer}
+      .hint{margin-top:10px;font-size:.95rem;color:#93c5fd}
+      .hidden{display:none}
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Welcome</h1>
+      <p>Sign in or create an account to access the freelance roadmap and save your goals.</p>
+      <div class="tabs">
+        <div class="tab active" data-mode="login">Login</div>
+        <div class="tab" data-mode="signup">Sign up</div>
+      </div>
+
+      <form id="loginForm" class="auth-form">
+        <input id="email" type="email" placeholder="Email" required />
+        <input id="password" type="password" placeholder="Password" required />
+        <button type="submit">Login</button>
+      </form>
+
+      <form id="signupForm" class="auth-form hidden">
+        <input id="signupEmail" type="email" placeholder="Email" required />
+        <input id="signupPassword" type="password" placeholder="Password" required />
+        <button type="submit">Create Account</button>
+      </form>
+
+      <p id="authMessage" class="hint">Use any email and password with at least 4 characters.</p>
+    </div>
+
+    <script>
+      const tabs = document.querySelectorAll('.tab');
+      const forms = document.querySelectorAll('.auth-form');
+      const message = document.getElementById('authMessage');
+
+      tabs.forEach(tab => tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const mode = tab.dataset.mode;
+        forms.forEach(form => form.classList.add('hidden'));
+        document.getElementById(mode === 'signup' ? 'signupForm' : 'loginForm').classList.remove('hidden');
+      }));
+
+      async function submitAuth(event, endpoint, emailId, passwordId) {
+        event.preventDefault();
+        const email = document.getElementById(emailId).value.trim();
+        const password = document.getElementById(passwordId).value;
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        message.textContent = data.message || 'Done';
+        if (data.ok) {
+          localStorage.setItem('freelance-token', data.token);
+          window.location.href = 'index.html';
+        }
+      }
+
+      document.getElementById('loginForm').addEventListener('submit', (e) => submitAuth(e, '/api/login', 'email', 'password'));
+      document.getElementById('signupForm').addEventListener('submit', (e) => submitAuth(e, '/api/signup', 'signupEmail', 'signupPassword'));
+    </script>
+  </body>
+</html>
