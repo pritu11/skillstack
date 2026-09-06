@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Services | SkillToFreelance</title>
+    <title>Services | SkillStack</title>
     <style>
       :root {
         --bg: #f4f7fb;
@@ -16,7 +16,7 @@
         --border: #dce4f0;
         --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
       }
-      body.dark {
+      html.dark, body.dark {
         --bg: #07111f;
         --surface: #101b2b;
         --surface-2: #162235;
@@ -28,58 +28,206 @@
         --shadow: 0 14px 36px rgba(0, 0, 0, 0.28);
       }
       * { box-sizing: border-box; }
-      body { margin: 0; font-family: Inter, Segoe UI, Arial, sans-serif; background: linear-gradient(135deg, var(--surface-2), var(--bg)); color: var(--text)); line-height: 1.6; }
+      body { margin: 0; font-family: Inter, Segoe UI, Arial, sans-serif; background: linear-gradient(135deg, var(--surface-2), var(--bg)); color: var(--text); line-height: 1.6; visibility: hidden; }
       a { color: inherit; }
-      .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
-      .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+      .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; padding-top:96px; }
+      .btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; border-radius: 999px; border: none; font-weight: 700; cursor: pointer; transition: transform 0.16s ease, box-shadow 0.16s ease; }
+      .btn-primary { background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: white; }
+      .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+      .service-card { position: relative; display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; }
+      .service-card:hover { transform: translateY(-4px); border-color: rgba(37,99,235,0.25); box-shadow: 0 20px 40px rgba(15,23,42,0.12); }
+      .service-card.active { border-color: rgba(56,189,248,0.5); }
+      .service-card button { width: fit-content; }
+      .service-summary { margin-top: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 24px; box-shadow: var(--shadow); }
+      .service-summary h2 { margin-top: 0; }
+      .service-summary p { margin-bottom: 16px; }
+      .topbar { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 24px; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(15,23,42,0.08); z-index: 1000; flex-wrap: wrap; border-bottom: 1px solid rgba(15,23,42,0.05); }
+      html.dark .topbar, body.dark .topbar { background: rgba(16,27,43,0.9); border-bottom-color: rgba(255,255,255,0.08); }
       .brand { font-size: 1.1rem; font-weight: 800; }
-      .nav-links { display: flex; gap: 14px; flex-wrap: wrap; }
+      .brand-block { display: flex; flex-direction: column; gap: 4px; }
+      .brand-sub { color: var(--muted); font-size: 0.92rem; }
+      .nav-links { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 14px; flex-wrap: wrap; }
       .nav-links a { color: var(--muted); text-decoration: none; font-weight: 600; }
       .nav-links a:hover { color: var(--text); }
-      .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 18px; box-shadow: var(--shadow); }
+      .nav-links a.active { color: var(--accent); font-weight: 800; }
+      .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 20px; box-shadow: var(--shadow); }
       .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
-      .card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 16px; padding: 14px; }
+      .card { background: linear-gradient(135deg, var(--surface-2), var(--surface)); border: 1px solid var(--border); border-radius: 18px; padding: 14px; box-shadow: var(--shadow); }
       .muted { color: var(--muted); }
       .theme-btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-weight: 700; cursor: pointer; }
+      @media (max-width: 880px) {
+        .nav-links { position: static; transform: none; justify-content: center; margin-top: 8px; }
+      }
     </style>
   </head>
   <body>
     <div class="wrap">
       <header class="topbar">
-        <div class="brand">SkillToFreelance</div>
+        <div class="brand-block">
+          <div class="brand">SkillStack</div>
+          <div class="brand-sub">Professional freelance career access</div>
+        </div>
         <nav class="nav-links">
           <a href="index.html">Home</a>
-          <a href="about.html">About</a>
           <a href="roadmap.html">Roadmap</a>
           <a href="services.html">Services</a>
-          <a href="login.html">Login</a>
+          <a href="about.html">About</a>
         </nav>
-        <button class="theme-btn" id="themeToggle" type="button">🌙 Dark</button>
+        <div class="topbar-actions">
+          <button class="theme-btn" id="themeToggle" type="button">🌙 Dark</button>
+        </div>
       </header>
 
       <section class="panel">
         <h1 style="margin-top:0">Freelance services to start with</h1>
         <p class="muted">Simple services that are practical, low-risk, and easy to test as a beginner.</p>
         <div class="grid">
-          <div class="card"><h3>Design support</h3><p class="muted">Logo, social posts, presentation cleanup.</p></div>
-          <div class="card"><h3>Video editing</h3><p class="muted">Short reels, basic edits, caption styling.</p></div>
-          <div class="card"><h3>Content writing</h3><p class="muted">Blog drafts, captions, product descriptions.</p></div>
-          <div class="card"><h3>Automation setup</h3><p class="muted">Simple forms, workflow setup, small automations.</p></div>
+          <div class="card service-card" data-service="design">
+            <div>
+              <h3>Design support</h3>
+              <p class="muted">Logo, social posts, presentation cleanup.</p>
+            </div>
+            <button class="btn btn-primary" type="button" data-service="design">Start design</button>
+          </div>
+          <div class="card service-card" data-service="video">
+            <div>
+              <h3>Video editing</h3>
+              <p class="muted">Short reels, basic edits, caption styling.</p>
+            </div>
+            <button class="btn btn-primary" type="button" data-service="video">Start video</button>
+          </div>
+          <div class="card service-card" data-service="content">
+            <div>
+              <h3>Content writing</h3>
+              <p class="muted">Blog drafts, captions, product descriptions.</p>
+            </div>
+            <button class="btn btn-primary" type="button" data-service="content">Start writing</button>
+          </div>
+          <div class="card service-card" data-service="automation">
+            <div>
+              <h3>Automation setup</h3>
+              <p class="muted">Simple forms, workflow setup, small automations.</p>
+            </div>
+            <button class="btn btn-primary" type="button" data-service="automation">Start automation</button>
+          </div>
         </div>
+        <section class="service-summary" id="serviceSummary">
+          <h2>Select a service to begin</h2>
+          <p class="muted">Click any service card to see what’s included and launch a quick starter workflow.</p>
+          <div id="serviceDetails" class="muted">Your selected service summary will appear here once you choose a service.</div>
+          <button class="btn btn-primary" id="serviceAction" type="button" style="margin-top:18px;">Select a service first</button>
+        </section>
       </section>
-      <div class="footer" style="margin-top:18px;color:var(--muted);font-size:.95rem;">Contact: <a href="mailto:contact@skilltofreelance.app">contact@skilltofreelance.app</a> · <a href="terms.html">Terms & Privacy</a></div>
+      <div class="footer" style="margin-top:18px;color:var(--muted);font-size:.95rem;">Contact: <a href="mailto:contact@skilltofreelancer.app">contact@skilltofreelancer.app</a> · <a href="terms.html">Terms & Privacy</a></div>
       <div class="footer" style="margin-top:6px;color:var(--muted);font-size:.95rem;">Designed by Ajay @2026</div>
     </div>
 
     <script>
+      const token = localStorage.getItem('freelance-token');
+      if (!token) {
+        window.location.href = 'login.html?mode=login';
+      } else {
+        document.body.style.visibility = 'visible';
+      }
       const themeToggle = document.getElementById('themeToggle');
       function applyTheme(mode) {
+        document.documentElement.classList.toggle('dark', mode === 'dark');
         document.body.classList.toggle('dark', mode === 'dark');
-        themeToggle.textContent = mode === 'dark' ? '☀️ Light' : '🌙 Dark';
+        if (themeToggle) themeToggle.textContent = mode === 'dark' ? '☀️ Light' : '🌙 Dark';
         localStorage.setItem('skill-theme', mode);
       }
-      applyTheme(localStorage.getItem('skill-theme') || 'light');
-      themeToggle.addEventListener('click', () => applyTheme(document.body.classList.contains('dark') ? 'light' : 'dark'));
+      const savedTheme = localStorage.getItem('skill-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      applyTheme(savedTheme);
+      themeToggle.addEventListener('click', () => applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark'));
+      // Navigation guard: require login for all nav links when not authenticated
+      let navNavigationStarted = false;
+      document.querySelectorAll('.nav-links a').forEach((a) => {
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          if (navNavigationStarted) return;
+          navNavigationStarted = true;
+          const href = a.getAttribute('href');
+          if (!href) return;
+          const token = localStorage.getItem('freelance-token');
+          const protectedPages = ['roadmap.html', 'services.html'];
+          if (!token && protectedPages.includes(href)) {
+            window.location.href = 'login.html?mode=login';
+          } else {
+            window.location.href = href;
+          }
+        });
+      });
+
+      const services = {
+        design: {
+          title: 'Design support',
+          description: 'Create brand-ready designs for logos, social media posts, and presentation assets to help you win your first clients.',
+          action: 'Open roadmap to define your first offer'
+        },
+        video: {
+          title: 'Video editing',
+          description: 'Build editing packages for short reels, promotional clips, and captioned video content that clients can buy easily.',
+          action: 'Open roadmap to map your first video service'
+        },
+        content: {
+          title: 'Content writing',
+          description: 'Craft client-ready blog posts, captions, and product storytelling with a simple writing workflow.',
+          action: 'Open roadmap to package your writing service'
+        },
+        automation: {
+          title: 'Automation setup',
+          description: 'Set up forms, workflows, and small automations that save time for busy clients.',
+          action: 'Open roadmap to outline your automation offering'
+        }
+      };
+
+      let currentService = null;
+      const serviceDetails = document.getElementById('serviceDetails');
+      const serviceAction = document.getElementById('serviceAction');
+      const serviceCards = document.querySelectorAll('.service-card');
+
+      function updateServicePanel(name) {
+        currentService = name;
+        serviceCards.forEach(card => card.classList.toggle('active', card.dataset.service === name));
+        const service = services[name];
+        serviceDetails.textContent = service.description;
+        serviceAction.textContent = service.action;
+      }
+
+      serviceCards.forEach((card) => {
+        card.addEventListener('click', () => updateServicePanel(card.dataset.service));
+        const button = card.querySelector('button');
+        button.addEventListener('click', (event) => {
+          event.stopPropagation();
+          updateServicePanel(card.dataset.service);
+          const token = localStorage.getItem('freelance-token');
+          if (!token) {
+            window.location.href = 'login.html?mode=login';
+          } else {
+            window.location.href = 'roadmap.html';
+          }
+        });
+      });
+
+      serviceAction.addEventListener('click', () => {
+        if (!currentService) return;
+        const token = localStorage.getItem('freelance-token');
+        if (!token) {
+          window.location.href = 'login.html?mode=login';
+        } else {
+          window.location.href = 'roadmap.html';
+        }
+      });
+
+      // Mark active nav item
+      (function setActiveNav(){
+        const current = (location.pathname.split('/').pop() || 'index.html');
+        document.querySelectorAll('.nav-links a').forEach(a => {
+          const href = a.getAttribute('href');
+          if (href === current || (href === 'index.html' && current === '')) a.classList.add('active');
+        });
+      })();
     </script>
   </body>
 </html>

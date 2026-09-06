@@ -1,6 +1,7 @@
 import hashlib
 import json
 import os
+import re
 import uuid
 from datetime import datetime
 from flask import Flask, jsonify, request, send_from_directory
@@ -15,6 +16,10 @@ def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode("utf-8")).hexdigest()
 
 
+def is_valid_email(email: str) -> bool:
+    return bool(re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email))
+
+
 @app.get('/api/health')
 def health():
     return jsonify({"ok": True, "message": "Server running"})
@@ -26,7 +31,7 @@ def signup():
     email = (payload.get('email') or '').strip().lower()
     password = (payload.get('password') or '').strip()
 
-    if not email or len(password) < 4:
+    if not email or not is_valid_email(email) or len(password) < 4:
         return jsonify({"ok": False, "message": "Please provide a valid email and password"}), 400
 
     if any(user.get('email') == email for user in DATA['users']):

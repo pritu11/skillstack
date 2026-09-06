@@ -3,16 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login | SkillToFreelance</title>
+    <title>Login | SkillStack</title>
     <style>
-      :root { --bg:#07111f; --card:#101a2b; --text:#f8fafc; --muted:#9fb0c9; --accent:#38bdf8; --accent2:#818cf8; --border:#243447; --error:#fb7185; --success:#34d399; }
-      *{box-sizing:border-box} body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,var(--bg),#13253d);color:var(--text);min-height:100vh;display:grid;place-items:center;padding:20px}
-      .card{width:100%;max-width:420px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:22px;box-shadow:0 16px 45px rgba(0,0,0,.28)}
+      :root { --bg:#f4f7fb; --card:#ffffff; --surface:#ffffff; --text:#14213d; --muted:#5f6b7a; --accent:#2563eb; --accent2:#3b82f6; --border:#dce4f0; --error:#dc2626; --success:#15803d; }
+      html.dark, body.dark { --bg:#07111f; --card:#101a2b; --surface:#111c2f; --text:#f8fafc; --muted:#9fb0c9; --accent:#38bdf8; --accent2:#818cf8; --border:#243447; --error:#fb7185; --success:#34d399; }
+      *{box-sizing:border-box}
+      body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,var(--surface),var(--bg));color:var(--text);min-height:100vh;padding:20px;transition:background .25s ease,color .25s ease}
+      a{color:inherit}
+      .topbar{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 24px;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);box-shadow:0 8px 28px rgba(15,23,42,.12);z-index:1000;flex-wrap:wrap}
+      html.dark .topbar, body.dark .topbar{background:rgba(16,26,43,.95);box-shadow:0 8px 28px rgba(0,0,0,.22)}
+      .brand-block{display:flex;flex-direction:column;gap:4px}
+      .brand-sub{color:var(--muted);font-size:0.92rem}
+      .nav-links{position:absolute;left:50%;transform:translateX(-50%);display:flex;gap:14px;flex-wrap:wrap}
+      .nav-links a{color:var(--muted);text-decoration:none;font-weight:600}
+      .nav-links a:hover{color:var(--text)}
+      .nav-links a.active{color:var(--accent);font-weight:800}
+      .topbar-actions{display:flex;align-items:center;gap:10px}
+      .theme-btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--text);font-weight:700;cursor:pointer}
+      .content-wrap{min-height:calc(100vh - 40px);display:flex;align-items:center;justify-content:center;flex-direction:column;padding:110px 0 40px;gap:20px}
+      .card{width:100%;max-width:430px;background:var(--card);border:1px solid var(--border);border-radius:22px;padding:24px;box-shadow:0 16px 45px rgba(0,0,0,.28);}
       .brand{font-size:.9rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;font-weight:700}
       h1{margin-top:0;margin-bottom:8px;font-size:1.8rem} p{color:var(--muted)}
       .tabs{display:flex;gap:8px;margin:18px 0}.tab{flex:1;padding:10px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.04);cursor:pointer;text-align:center;font-weight:600}
       .tab.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:white}
-      form{display:grid;gap:10px;margin-top:12px} input{padding:12px 13px;border-radius:12px;border:1px solid var(--border);background:#0b1320;color:white;outline:none}
+      form{display:grid;gap:10px;margin-top:12px} input{padding:12px 13px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);outline:none}
       input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(56,189,248,.18)}
       button{padding:12px 14px;border:none;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:white;font-weight:700;cursor:pointer;transition:transform .15s ease, opacity .15s ease}
       button:hover{transform:translateY(-1px)} button:disabled{opacity:.7;cursor:wait}
@@ -20,22 +34,31 @@
       .hint.error{color:var(--error);border-color:rgba(251,113,133,.25)} .hint.success{color:var(--success);border-color:rgba(52,211,153,.25)}
       .small{font-size:.9rem;color:var(--muted);margin-top:8px}
       .hidden{display:none}
+      @media (max-width: 880px) {
+        .nav-links{position:static;transform:none;justify-content:center;margin-top:8px}
+        .topbar{justify-content:center}
+      }
     </style>
   </head>
   <body>
     <div class="topbar">
-      <div class="brand">Freelance Career Starter</div>
-      <div class="nav-links">
+      <div class="brand-block">
+        <div class="brand">SkillStack</div>
+        <div class="brand-sub">Professional freelance career access</div>
+      </div>
+      <nav class="nav-links">
         <a href="index.html">Home</a>
-        <a href="about.html">About</a>
-        <a href="services.html">Services</a>
         <a href="roadmap.html">Roadmap</a>
-        <a href="login.html">Login</a>
+        <a href="services.html">Services</a>
+        <a href="about.html">About</a>
+      </nav>
+      <div class="topbar-actions">
+        <button class="theme-btn" id="themeToggle" type="button">🌙 Dark</button>
       </div>
     </div>
     <div class="content-wrap">
       <div class="card">
-        <div class="brand">Freelance Career Starter</div>
+        <div class="brand">SkillStack</div>
         <h1>Welcome back</h1>
         <p>Sign in or create an account to access the freelance roadmap and save your goals.</p>
         <div class="tabs">
@@ -58,7 +81,7 @@
         <p id="authMessage" class="hint">Use any email and password with at least 4 characters.</p>
         <p class="small">Your account is stored locally in this demo app for quick testing.</p>
       </div>
-      <div class="footer" style="margin-top:18px;color:var(--muted);font-size:.95rem;padding-left:10px;">Contact: <a href="mailto:contact@skilltofreelance.app">contact@skilltofreelance.app</a> · <a href="terms.html">Terms & Privacy</a></div>
+      <div class="footer" style="margin-top:18px;color:var(--muted);font-size:.95rem;padding-left:10px;">Contact: <a href="mailto:contact@skilltofreelancer.app">contact@skilltofreelancer.app</a> · <a href="terms.html">Terms & Privacy</a></div>
       <div class="footer" style="margin-top:6px;color:var(--muted);font-size:.95rem;padding-left:10px;">Designed by Ajay @2026</div>
     </div>
 
@@ -66,6 +89,11 @@
       const tabs = document.querySelectorAll('.tab');
       const forms = document.querySelectorAll('.auth-form');
       const message = document.getElementById('authMessage');
+      const apiBase = window.location.protocol === 'file:' ? 'http://127.0.0.1:8000' : '';
+
+      function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
 
       tabs.forEach(tab => tab.addEventListener('click', () => {
         tabs.forEach(t => t.classList.remove('active'));
@@ -75,12 +103,67 @@
         document.getElementById(mode === 'signup' ? 'signupForm' : 'loginForm').classList.remove('hidden');
       }));
 
+      // If a mode param is present in the URL, show that tab (login or signup)
+      (function applyUrlMode() {
+        const params = new URLSearchParams(window.location.search);
+        const mode = params.get('mode');
+        if (mode === 'signup' || mode === 'login') {
+          tabs.forEach(t => t.classList.remove('active'));
+          forms.forEach(form => form.classList.add('hidden'));
+          const tab = Array.from(tabs).find(t => t.dataset.mode === mode);
+          if (tab) tab.classList.add('active');
+          const formId = mode === 'signup' ? 'signupForm' : 'loginForm';
+          const formEl = document.getElementById(formId);
+          if (formEl) formEl.classList.remove('hidden');
+        }
+      })();
+
+      const themeToggle = document.getElementById('themeToggle');
+      function applyTheme(mode) {
+        document.documentElement.classList.toggle('dark', mode === 'dark');
+        if (themeToggle) themeToggle.textContent = mode === 'dark' ? '☀️ Light' : '🌙 Dark';
+        localStorage.setItem('skill-theme', mode);
+      }
+      const savedTheme = localStorage.getItem('skill-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      applyTheme(savedTheme);
+      themeToggle.addEventListener('click', () => {
+        applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+      });
+
+      let navNavigationStarted = false;
+      document.querySelectorAll('.nav-links a').forEach((a) => {
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          if (navNavigationStarted) return;
+          navNavigationStarted = true;
+          const href = a.getAttribute('href');
+          if (!href) return;
+          const token = localStorage.getItem('freelance-token');
+          const protectedPages = ['roadmap.html', 'services.html'];
+          if (!token && protectedPages.includes(href)) {
+            window.location.href = 'login.html?mode=login';
+          } else {
+            window.location.href = href;
+          }
+        });
+      });
+
+      // Mark active nav item
+      (function setActiveNav(){
+        const current = (location.pathname.split('/').pop() || 'index.html');
+        document.querySelectorAll('.nav-links a').forEach(a => {
+          const href = a.getAttribute('href');
+          if (href === current || (href === 'index.html' && current === '')) a.classList.add('active');
+        });
+      })();
+
       async function submitAuth(event, endpoint, emailId, passwordId) {
         event.preventDefault();
         const email = document.getElementById(emailId).value.trim();
         const password = document.getElementById(passwordId).value;
 
-        if (!email || !password || password.length < 4) {
+        if (!isValidEmail(email) || !password || password.length < 4) {
           message.className = 'hint error';
           message.textContent = 'Please enter a valid email and a password with at least 4 characters.';
           return;
@@ -91,12 +174,12 @@
         button.textContent = 'Please wait...';
 
         try {
-          const res = await fetch(endpoint, {
+          const res = await fetch(`${apiBase}${endpoint}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
           });
-          const data = await res.json();
+          const data = await res.json().catch(() => ({}));
           if (data.ok) {
             localStorage.setItem('freelance-token', data.token);
             message.className = 'hint success';
@@ -104,11 +187,13 @@
             setTimeout(() => window.location.href = 'roadmap.html', 600);
           } else {
             message.className = 'hint error';
-            message.textContent = data.message || 'Something went wrong.';
+            message.textContent = data.message || `Request failed (${res.status}).`;
           }
         } catch (error) {
           message.className = 'hint error';
-          message.textContent = 'Network error. Please try again.';
+          message.textContent = apiBase
+            ? 'Cannot reach the local API. Start the app with: python3 app.py'
+            : 'Cannot reach the API. Check that the server is running and try again.';
         } finally {
           button.disabled = false;
           button.textContent = endpoint.includes('signup') ? 'Create account' : 'Log in';

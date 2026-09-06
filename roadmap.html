@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Roadmap | SkillToFreelance</title>
+    <title>Roadmap | SkillStack</title>
     <style>
       :root {
         --bg: #f4f7fb;
@@ -16,7 +16,7 @@
         --border: #dce4f0;
         --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
       }
-      body.dark {
+      html.dark, body.dark {
         --bg: #07111f;
         --surface: #101b2b;
         --surface-2: #162235;
@@ -34,22 +34,41 @@
         background: linear-gradient(135deg, var(--surface-2), var(--bg));
         color: var(--text);
         line-height: 1.6;
+        visibility: hidden;
       }
       a { color: inherit; }
-      .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
-      .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+      .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; padding-top:96px; }
+      .topbar { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 24px; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(15,23,42,0.08); z-index: 1000; flex-wrap: wrap; border-bottom: 1px solid rgba(15,23,42,0.05); }
+      html.dark .topbar, body.dark .topbar { background: rgba(16,27,43,0.9); border-bottom-color: rgba(255,255,255,0.08); }
       .brand { font-size: 1.1rem; font-weight: 800; }
-      .nav-links { display: flex; gap: 14px; flex-wrap: wrap; }
+      .brand-block { display: flex; flex-direction: column; gap: 4px; }
+      .brand-sub { color: var(--muted); font-size: 0.92rem; }
+      .nav-links { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 14px; flex-wrap: wrap; }
       .nav-links a { color: var(--muted); text-decoration: none; font-weight: 600; }
       .nav-links a:hover { color: var(--text); }
+      .nav-links a.active { color: var(--accent); font-weight: 800; }
       .topbar-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-      .theme-btn, .btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; border-radius: 999px; border: 1px solid var(--border); font-weight: 700; cursor: pointer; text-decoration: none; }
+      .theme-btn, .btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; border-radius: 999px; border: 1px solid var(--border); font-weight: 700; cursor: pointer; text-decoration: none; transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease; }
+      .theme-btn:hover, .btn:hover { box-shadow: 0 8px 20px rgba(37,99,235,0.16); }
       .theme-btn { background: var(--surface); color: var(--text); }
       .btn-primary { background: linear-gradient(90deg, var(--accent), var(--accent-2)); color: white; border-color: transparent; }
       .btn-secondary { background: var(--surface); color: var(--text); }
-      .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 18px; box-shadow: var(--shadow); }
-      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-      .card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 16px; padding: 14px; }
+      .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 22px; padding: 20px; box-shadow: var(--shadow); }
+      /* Make the grid auto-fit narrow cards and center the whole grid */
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 520px)); gap: 18px; justify-content: center; align-items: start; }
+      .card { background: linear-gradient(135deg, var(--surface-2), var(--surface)); border: 1px solid var(--border); border-radius: 18px; padding: 18px; width: 100%; max-width: 560px; box-sizing: border-box; box-shadow: var(--shadow); }
+      /* Center the roadmap form inside its card and constrain inputs */
+      #roadmapForm { width: 100%; max-width: 480px; margin: 0 auto; display: grid; gap: 12px; }
+      #roadmapForm .input, #roadmapForm select { max-width: 100%; }
+      .feature-section { margin-top: 18px; padding: 18px; border-radius: 20px; border: 1px solid var(--border); background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(59, 130, 246, 0.04)); }
+      .feature-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+      .feature-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); font-size: 0.85rem; font-weight: 700; color: var(--accent); }
+      .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+      .feature-card { position: relative; overflow: hidden; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px; }
+      .feature-card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+      .feature-title { font-weight: 800; margin: 0 0 6px; }
+      .feature-list { margin: 0; padding-left: 18px; color: var(--muted); }
+      .feature-list li { margin-bottom: 4px; }
       .muted { color: var(--muted); }
       .input, select { width: 100%; padding: 12px 13px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
       .result-list { display: grid; gap: 10px; margin-top: 10px; }
@@ -59,6 +78,9 @@
       .footer { text-align: center; padding: 24px 0 12px; color: var(--muted); }
       .hidden { display: none !important; }
       @media (max-width: 780px) { .grid { grid-template-columns: 1fr; } }
+      @media (max-width: 880px) {
+        .nav-links { position: static; transform: none; justify-content: center; margin-top: 8px; }
+      }
       @media print {
         body * { visibility: hidden; }
         .print-area, .print-area * { visibility: visible; }
@@ -69,17 +91,18 @@
   <body>
     <div class="wrap">
       <header class="topbar">
-        <div class="brand">SkillToFreelance</div>
+        <div class="brand-block">
+          <div class="brand">SkillStack</div>
+          <div class="brand-sub">Professional freelance career access</div>
+        </div>
         <nav class="nav-links">
           <a href="index.html">Home</a>
-          <a href="about.html">About</a>
           <a href="roadmap.html">Roadmap</a>
           <a href="services.html">Services</a>
-          <a href="login.html">Login</a>
+          <a href="about.html">About</a>
         </nav>
         <div class="topbar-actions">
           <button class="theme-btn" id="themeToggle" type="button">🌙 Dark</button>
-          <a class="btn btn-secondary" href="login.html" id="loginLink">Login / Signup</a>
           <button class="btn btn-secondary hidden" id="logoutBtn" type="button">Logout</button>
         </div>
       </header>
@@ -87,6 +110,7 @@
       <section class="panel">
         <h1 style="margin-top:0">AI roadmap assistant</h1>
         <p class="muted">Enter your skill, goal, and experience level to build a practical roadmap for your freelance journey.</p>
+        <div id="authHint" class="muted" style="margin-bottom:10px;">You can generate a roadmap without logging in. Log in to save your roadmap.</div>
         <div class="grid">
           <div class="card">
             <form id="roadmapForm">
@@ -108,8 +132,19 @@
         </div>
       </section>
 
+      <section class="feature-section">
+        <div class="feature-header">
+          <div>
+            <div class="feature-pill">✨ Recommended tools & tech</div>
+            <h2 style="margin: 8px 0 0;">Best tools to learn for your freelance path</h2>
+          </div>
+          <div class="muted">Suggestions update as soon as you enter a skill.</div>
+        </div>
+        <div id="recommendedTools" class="feature-grid"></div>
+      </section>
+
       <div class="footer">A clear step-by-step freelance roadmap.</div>
-      <div class="footer" style="font-size:0.95rem;color:var(--muted);margin-top:12px;">Contact: <a href="mailto:contact@skilltofreelance.app">contact@skilltofreelance.app</a> · <a href="terms.html">Terms & Privacy</a></div>
+      <div class="footer" style="font-size:0.95rem;color:var(--muted);margin-top:12px;">Contact: <a href="mailto:contact@skilltofreelancer.app">contact@skilltofreelancer.app</a> · <a href="terms.html">Terms & Privacy</a></div>
       <div class="footer" style="font-size:0.95rem;color:var(--muted);margin-top:6px;">Designed by Ajay @2026</div>
     </div>
 
@@ -117,32 +152,181 @@
 
     <script>
       const token = localStorage.getItem('freelance-token');
+      if (!token) {
+        window.location.href = 'login.html?mode=login';
+      } else {
+        document.body.style.visibility = 'visible';
+      }
       const loginLink = document.getElementById('loginLink');
       const logoutBtn = document.getElementById('logoutBtn');
       const roadmapForm = document.getElementById('roadmapForm');
       const roadmapResult = document.getElementById('roadmapResult');
+      const recommendedTools = document.getElementById('recommendedTools');
+      const featureSection = document.querySelector('.feature-section');
+      const skillInput = document.getElementById('skillInput');
       const themeToggle = document.getElementById('themeToggle');
 
       function applyTheme(mode) {
+        document.documentElement.classList.toggle('dark', mode === 'dark');
         document.body.classList.toggle('dark', mode === 'dark');
-        themeToggle.textContent = mode === 'dark' ? '☀️ Light' : '🌙 Dark';
+        if (themeToggle) themeToggle.textContent = mode === 'dark' ? '☀️ Light' : '🌙 Dark';
         localStorage.setItem('skill-theme', mode);
       }
-      const savedTheme = localStorage.getItem('skill-theme') || 'light';
+      const savedTheme = localStorage.getItem('skill-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       applyTheme(savedTheme);
       themeToggle.addEventListener('click', () => {
-        const next = document.body.classList.contains('dark') ? 'light' : 'dark';
+        const next = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
         applyTheme(next);
       });
 
       if (token) {
-        loginLink.classList.add('hidden');
+        if (loginLink) loginLink.classList.add('hidden');
         logoutBtn.classList.remove('hidden');
+        const authHintEl = document.getElementById('authHint');
+        if (authHintEl) authHintEl.classList.add('hidden');
       }
       logoutBtn.addEventListener('click', () => {
         localStorage.removeItem('freelance-token');
         location.reload();
       });
+
+      // Navigation guard: require login for all nav links when not authenticated
+      let navNavigationStarted = false;
+      document.querySelectorAll('.nav-links a').forEach((a) => {
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          if (navNavigationStarted) return;
+          navNavigationStarted = true;
+          const href = a.getAttribute('href');
+          if (!href) return;
+          const token = localStorage.getItem('freelance-token');
+          const protectedPages = ['roadmap.html', 'services.html'];
+          if (!token && protectedPages.includes(href)) {
+            window.location.href = 'login.html?mode=login';
+          } else {
+            window.location.href = href;
+          }
+        });
+      });
+
+      // Mark active nav item
+      (function setActiveNav(){
+        const current = (location.pathname.split('/').pop() || 'index.html');
+        document.querySelectorAll('.nav-links a').forEach(a => {
+          const href = a.getAttribute('href');
+          if (href === current || (href === 'index.html' && current === '')) a.classList.add('active');
+        });
+      })();
+
+      const toolProfiles = {
+        design: [
+          { title: 'Design Stack', tools: ['Figma for UI and product design', 'Canva for quick brand assets', 'Adobe Illustrator for logos and vector work'] },
+          { title: 'Branding Tools', tools: ['Adobe Photoshop for edits', 'Notion for client briefs', 'Behance for portfolio inspiration'] }
+        ],
+        video: [
+          { title: 'Video Editing', tools: ['CapCut for short-form edits', 'Premiere Pro for polished work', 'DaVinci Resolve for color grading'] },
+          { title: 'Content Workflow', tools: ['Descript for captions', 'Frame.io for feedback', 'Canva for thumbnails'] }
+        ],
+        coding: [
+          { title: 'Development Stack', tools: ['VS Code for building projects', 'GitHub for version control', 'Postman for testing APIs'] },
+          { title: 'Launch Tools', tools: ['Netlify or Vercel for deployment', 'Figma for UI mockups', 'ChatGPT for debugging help'] }
+        ],
+        content: [
+          { title: 'Content Creation', tools: ['Canva for social visuals', 'Notion for content planning', 'ChatGPT for drafts and ideas'] },
+          { title: 'Growth Tools', tools: ['Buffer for scheduling', 'Google Analytics for tracking', 'Ahrefs for SEO research'] }
+        ],
+        marketing: [
+          { title: 'Marketing Stack', tools: ['Meta Ads Manager for campaigns', 'Mailchimp for email outreach', 'Canva for ad creatives'] },
+          { title: 'Analytics Tools', tools: ['Google Analytics for insights', 'Trello for campaign planning', 'Notion for client strategy'] }
+        ],
+        data: [
+          { title: 'Data Workflow', tools: ['Excel or Google Sheets for analysis', 'Python for automation', 'Power BI for dashboards'] },
+          { title: 'Presentation Tools', tools: ['Notion for reports', 'Canva for charts', 'Google Data Studio for visuals'] }
+        ],
+        audio: [
+          { title: 'Audio Production', tools: ['Audacity for recording and cleanup', 'Adobe Audition for advanced editing', 'Descript for transcripts and podcasts'] },
+          { title: 'Publishing Workflow', tools: ['CapCut for clips', 'Anchor for hosting', 'Notion for show outlines'] }
+        ],
+        writing: [
+          { title: 'Writing Toolkit', tools: ['Grammarly for polishing', 'Notion for outlines and briefs', 'ChatGPT for drafts and ideas'] },
+          { title: 'Publishing Helpers', tools: ['Canva for visuals', 'Buffer for scheduling', 'Google Docs for collaboration'] }
+        ],
+        business: [
+          { title: 'Client Ops', tools: ['Notion for proposals and planning', 'Trello for tasks and delivery', 'Google Calendar for follow-ups'] },
+          { title: 'Growth Tools', tools: ['LinkedIn for outreach', 'Calendly for meetings', 'Stripe for payments'] }
+        ]
+      };
+
+      const skillCategories = [
+        { key: 'design', keywords: ['design', 'ui', 'ux', 'logo', 'branding', 'figma', 'illustration', 'mockup', 'poster', 'banner', 'image', 'photo', 'graphics', 'visual'] },
+        { key: 'video', keywords: ['video', 'edit', 'reel', 'youtube', 'short', 'motion', 'animation', 'film', 'clip', 'cinema'] },
+        { key: 'coding', keywords: ['code', 'coding', 'web', 'app', 'software', 'program', 'python', 'javascript', 'react', 'node', 'developer', 'build', 'website', 'tech'] },
+        { key: 'content', keywords: ['content', 'copy', 'blog', 'seo', 'social', 'marketing', 'ads', 'email', 'campaign', 'post', 'writer', 'writing'] },
+        { key: 'marketing', keywords: ['market', 'growth', 'sales', 'lead', 'crm', 'outreach', 'promotion', 'brand'] },
+        { key: 'data', keywords: ['data', 'excel', 'analysis', 'dashboard', 'sheet', 'analytics', 'report', 'statistics'] },
+        { key: 'audio', keywords: ['audio', 'music', 'voice', 'podcast', 'sound', 'speech', 'voiceover'] },
+        { key: 'writing', keywords: ['write', 'writing', 'copywriting', 'article', 'blog', 'essay', 'script', 'content'] },
+        { key: 'business', keywords: ['business', 'client', 'consulting', 'ops', 'management', 'strategy', 'service', 'freelance'] }
+      ];
+
+      function getRecommendedTools(skill) {
+        const text = (skill || '').trim().toLowerCase();
+        if (!text || text.length < 3) {
+          return null;
+        }
+
+        const tokens = text.split(/[^a-z0-9]+/).filter(Boolean);
+        const categoryScores = skillCategories.map((category) => {
+          let score = 0;
+          category.keywords.forEach((keyword) => {
+            if (text.includes(keyword)) score += 3;
+            if (tokens.includes(keyword)) score += 2;
+          });
+          return { key: category.key, score };
+        });
+
+        const bestMatch = categoryScores.sort((a, b) => b.score - a.score)[0];
+        if (!bestMatch || bestMatch.score < 3) {
+          return [
+            {
+              title: 'AI-generated starter pack',
+              tools: [
+                `Best tools for ${skill.trim()}`,
+                'Portfolio workspace',
+                'Project management',
+                'Client communication'
+              ]
+            }
+          ];
+        }
+
+        const cards = toolProfiles[bestMatch.key] || [];
+        return cards.map((card, index) => ({
+          ...card,
+          title: index === 0 ? `AI-picked ${card.title}` : card.title
+        }));
+      }
+
+      function renderRecommendedTools(skill) {
+        const cards = getRecommendedTools(skill);
+        const hasMeaningfulInput = Boolean((skill || '').trim() && (skill || '').trim().length >= 3);
+        if (!cards || !hasMeaningfulInput) {
+          recommendedTools.innerHTML = '';
+          featureSection.classList.add('hidden');
+          return;
+        }
+
+        recommendedTools.innerHTML = cards.map((card) => `
+          <div class="feature-card">
+            <h3 class="feature-title">${card.title}</h3>
+            <ul class="feature-list">
+              ${card.tools.map((tool) => `<li>${tool}</li>`).join('')}
+            </ul>
+          </div>
+        `).join('');
+        featureSection.classList.remove('hidden');
+      }
 
       function buildRoadmap(skill, goal, level) {
         const skillName = skill.trim() || 'your chosen skill';
@@ -182,7 +366,7 @@
         document.getElementById('downloadPdfBtn').addEventListener('click', () => {
           const printArea = document.getElementById('printArea');
           printArea.innerHTML = `
-            <h1>SkillToFreelance Roadmap</h1>
+            <h1>SkillToFreelancer Roadmap</h1>
             <p><strong>Skill:</strong> ${roadmap.skillName}</p>
             <p><strong>Goal:</strong> ${roadmap.goalText}</p>
             <h3>Action plan</h3>
@@ -194,6 +378,9 @@
           window.print();
         });
       }
+
+      skillInput.addEventListener('input', () => renderRecommendedTools(skillInput.value));
+      renderRecommendedTools(skillInput.value);
 
       roadmapForm.addEventListener('submit', (event) => {
         event.preventDefault();

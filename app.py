@@ -1,5 +1,6 @@
 import hashlib
 import json
+import re
 import uuid
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -31,6 +32,10 @@ def save_json(path: Path, data):
 
 def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+
+def is_valid_email(email: str) -> bool:
+    return bool(re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email))
 
 
 class FreelanceHandler(BaseHTTPRequestHandler):
@@ -106,7 +111,7 @@ class FreelanceHandler(BaseHTTPRequestHandler):
         email = (payload.get("email") or "").strip().lower()
         password = (payload.get("password") or "").strip()
 
-        if not email or not password or len(password) < 4:
+        if not email or not is_valid_email(email) or not password or len(password) < 4:
             self.send_json({"ok": False, "message": "Please provide a valid email and a password with at least 4 characters"}, 400)
             return
 

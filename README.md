@@ -1,6 +1,6 @@
-# Freelance Career Starter
+# SkillStack
 
-A simple freelance career starter site with login/signup, a small backend API, and a polished landing page.
+A simple freelance career platform with login/signup, a small backend API, and a polished landing page.
 
 ## Run locally
 
