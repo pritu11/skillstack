@@ -34,6 +34,7 @@
         background: linear-gradient(135deg, var(--surface-2), var(--bg));
         color: var(--text);
         line-height: 1.6;
+        overflow-x: hidden;
         visibility: hidden;
       }
       a { color: inherit; }
@@ -77,9 +78,25 @@
       .print-area { display: none; }
       .footer { text-align: center; padding: 24px 0 12px; color: var(--muted); }
       .hidden { display: none !important; }
-      @media (max-width: 780px) { .grid { grid-template-columns: 1fr; } }
-      @media (max-width: 880px) {
-        .nav-links { position: static; transform: none; justify-content: center; margin-top: 8px; }
+      @media (max-width: 960px) {
+        .wrap { padding: 16px; padding-top: 16px; }
+        .topbar { position: sticky; top: 0; left: auto; right: auto; width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; padding: 10px 12px 8px; margin-bottom: 2px; }
+        .nav-links { position: static; left: auto; transform: none; grid-column: 1 / -1; width: 100%; justify-content: flex-start; flex-wrap: nowrap; gap: 4px; margin: 0; padding: 6px 0 2px; overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+        .nav-links a { display: inline-flex; align-items: center; flex: 0 0 auto; min-height: 44px; padding: 0 10px; }
+        .topbar-actions { justify-self: end; }
+        .grid { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 520px) {
+        .wrap { padding: 12px; padding-top: 12px; }
+        .brand-sub { display: none; }
+        .brand { font-size: 1rem; }
+        .topbar { padding: 9px 10px 7px; }
+        .topbar-actions { gap: 4px; }
+        .theme-btn, .btn { min-height: 44px; }
+        .back-btn { min-width: 44px; padding: 10px; font-size: 0; }
+        .back-btn::after { content: '←'; font-size: 1.25rem; line-height: 1; }
+        .panel, .card, .feature-section { border-radius: 16px; padding: 16px; }
+        .feature-header { align-items: flex-start; }
       }
       @media print {
         body * { visibility: hidden; }
@@ -102,6 +119,7 @@
           <a href="about.html">About</a>
         </nav>
         <div class="topbar-actions">
+          <button class="theme-btn back-btn" id="backBtn" type="button" aria-label="Go back">← Back</button>
           <button class="theme-btn" id="themeToggle" type="button">🌙 Dark</button>
           <button class="btn btn-secondary hidden" id="logoutBtn" type="button">Logout</button>
         </div>
@@ -165,6 +183,14 @@
       const featureSection = document.querySelector('.feature-section');
       const skillInput = document.getElementById('skillInput');
       const themeToggle = document.getElementById('themeToggle');
+      const backBtn = document.getElementById('backBtn');
+
+      if (backBtn) {
+        backBtn.addEventListener('click', () => {
+          if (window.history.length > 1) window.history.back();
+          else window.location.href = 'index.html';
+        });
+      }
 
       function applyTheme(mode) {
         document.documentElement.classList.toggle('dark', mode === 'dark');

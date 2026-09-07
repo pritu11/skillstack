@@ -19,7 +19,7 @@
       #message { min-height:22px; margin:14px 2px; color:var(--danger); font-weight:600; }
       .stats { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin:18px 0; }
       .stat { padding:20px; background:var(--surface); border:1px solid var(--line); border-radius:10px; } .stat small { display:block; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; font-weight:700; } .stat strong { display:block; margin-top:6px; font-size:2rem; }
-      .panel { margin-top:18px; padding:18px; background:var(--surface); border:1px solid var(--line); border-radius:10px; overflow:auto; }
+      .panel { margin-top:18px; padding:18px; background:var(--surface); border:1px solid var(--line); border-radius:10px; overflow:auto; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain; }
       .panel-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; } h1,h2 { margin:0; } h1 { font-size:1.8rem; } h2 { font-size:1.1rem; }
       table { width:100%; border-collapse:collapse; min-width:640px; } th,td { padding:11px 10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; } th { color:var(--muted); font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; } td { font-size:.92rem; }
       .hidden { display:none; }

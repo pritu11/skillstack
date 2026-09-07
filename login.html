@@ -8,7 +8,7 @@
       :root { --bg:#f4f7fb; --card:#ffffff; --surface:#ffffff; --text:#14213d; --muted:#5f6b7a; --accent:#2563eb; --accent2:#3b82f6; --border:#dce4f0; --error:#dc2626; --success:#15803d; }
       html.dark, body.dark { --bg:#07111f; --card:#101a2b; --surface:#111c2f; --text:#f8fafc; --muted:#9fb0c9; --accent:#38bdf8; --accent2:#818cf8; --border:#243447; --error:#fb7185; --success:#34d399; }
       *{box-sizing:border-box}
-      body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,var(--surface),var(--bg));color:var(--text);min-height:100vh;padding:20px;transition:background .25s ease,color .25s ease}
+      body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,var(--surface),var(--bg));color:var(--text);min-height:100vh;padding:20px;overflow-x:hidden;transition:background .25s ease,color .25s ease}
       a{color:inherit}
       .topbar{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 24px;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);box-shadow:0 8px 28px rgba(15,23,42,.12);z-index:1000;flex-wrap:wrap}
       html.dark .topbar, body.dark .topbar{background:rgba(16,26,43,.95);box-shadow:0 8px 28px rgba(0,0,0,.22)}
@@ -34,9 +34,26 @@
       .hint.error{color:var(--error);border-color:rgba(251,113,133,.25)} .hint.success{color:var(--success);border-color:rgba(52,211,153,.25)}
       .small{font-size:.9rem;color:var(--muted);margin-top:8px}
       .hidden{display:none}
-      @media (max-width: 880px) {
-        .nav-links{position:static;transform:none;justify-content:center;margin-top:8px}
-        .topbar{justify-content:center}
+      @media (max-width: 960px) {
+        body{padding:0 14px 20px}
+        .topbar{position:sticky;top:0;left:auto;right:auto;width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;padding:10px 12px 8px;margin-bottom:2px}
+        .nav-links{position:static;left:auto;transform:none;grid-column:1 / -1;width:100%;justify-content:flex-start;flex-wrap:nowrap;gap:4px;margin:0;padding:6px 0 2px;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+        .nav-links a{display:inline-flex;align-items:center;flex:0 0 auto;min-height:44px;padding:0 10px}
+        .topbar-actions{justify-self:end}
+        .content-wrap{min-height:calc(100vh - 72px);padding:24px 0;}
+      }
+      @media (max-width: 520px) {
+        body{padding:0 12px 16px}
+        .brand-sub{display:none}
+        .brand-block{font-size:.92rem}
+        .topbar{padding:9px 10px 7px}
+        .topbar-actions{gap:4px}
+        .theme-btn{min-height:44px;padding:10px 12px}
+        .back-btn{min-width:44px;padding:10px;font-size:0}
+        .back-btn::after{content:'←';font-size:1.25rem;line-height:1}
+        .content-wrap{padding:18px 0;gap:14px}
+        .card{padding:18px;border-radius:16px}
+        h1{font-size:1.55rem}
       }
     </style>
   </head>
@@ -53,6 +70,7 @@
         <a href="about.html">About</a>
       </nav>
       <div class="topbar-actions">
+        <button class="theme-btn back-btn" id="backBtn" type="button" aria-label="Go back">← Back</button>
         <button class="theme-btn" id="themeToggle" type="button">🌙 Dark</button>
       </div>
     </div>
@@ -119,6 +137,13 @@
       })();
 
       const themeToggle = document.getElementById('themeToggle');
+      const backBtn = document.getElementById('backBtn');
+      if (backBtn) {
+        backBtn.addEventListener('click', () => {
+          if (window.history.length > 1) window.history.back();
+          else window.location.href = 'index.html';
+        });
+      }
       function applyTheme(mode) {
         document.documentElement.classList.toggle('dark', mode === 'dark');
         if (themeToggle) themeToggle.textContent = mode === 'dark' ? '☀️ Light' : '🌙 Dark';

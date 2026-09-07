@@ -35,6 +35,7 @@
         background: linear-gradient(135deg, var(--surface-2), var(--bg));
         color: var(--text);
         line-height: 1.6;
+        overflow-x: hidden;
         transition: background 0.25s ease, color 0.25s ease;
       }
       a { color: inherit; }
@@ -101,9 +102,24 @@
       .footer { text-align: center; padding: 28px 0 10px; color: var(--muted); }
       .hidden { display: none !important; }
       .tiny { font-size: 0.9rem; color: var(--muted); }
-      @media (max-width: 880px) { .hero, .assistant-grid { grid-template-columns: 1fr; } .stats { grid-template-columns: 1fr; } }
-      @media (max-width: 880px) {
-        .nav-links { position: static; transform: none; justify-content: center; margin-top: 8px; }
+      @media (max-width: 960px) {
+        .wrap { padding: 16px; padding-top: 16px; }
+        .topbar { position: sticky; top: 0; left: auto; right: auto; width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; padding: 10px 12px 8px; margin-bottom: 2px; }
+        .nav-links { position: static; left: auto; transform: none; grid-column: 1 / -1; width: 100%; justify-content: flex-start; flex-wrap: nowrap; gap: 4px; margin: 0; padding: 6px 0 2px; overflow-x: auto; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+        .nav-links a { display: inline-flex; align-items: center; flex: 0 0 auto; min-height: 44px; padding: 0 10px; }
+        .topbar-actions { justify-self: end; }
+        .hero, .assistant-grid { grid-template-columns: 1fr; }
+        .stats { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 520px) {
+        .wrap { padding: 12px; padding-top: 12px; }
+        .brand-sub { display: none; }
+        .topbar { padding: 9px 10px 7px; }
+        .theme-btn { min-height: 44px; padding: 10px 12px; }
+        .hero, .auth-card, .panel { border-radius: 16px; }
+        .hero { padding: 20px 16px; }
+        .auth-card, .panel { padding: 16px; }
+        .actions .btn { width: 100%; }
       }
       @media print {
         body * { visibility: hidden; }
