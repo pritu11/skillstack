@@ -1,7 +1,10 @@
 import hashlib
+import hmac
 import json
+import os
 import re
 import uuid
+from base64 import urlsafe_b64decode, urlsafe_b64encode
 from datetime import datetime
 from pathlib import Path
 from flask import Flask, jsonify, request, send_from_directory
@@ -11,6 +14,7 @@ DATA_DIR = ROOT / 'data'
 USERS_FILE = DATA_DIR / 'users.json'
 LEADS_FILE = DATA_DIR / 'leads.json'
 SESSIONS_FILE = DATA_DIR / 'sessions.json'
+TOKEN_SECRET = os.environ.get('SKILLSTACK_TOKEN_SECRET', 'skillstack-demo-secret')
 
 DATA_DIR.mkdir(exist_ok=True)
 for file_path in (USERS_FILE, LEADS_FILE, SESSIONS_FILE):
@@ -28,7 +32,10 @@ def load_json(path: Path):
 
 
 def save_json(path: Path, data):
-    path.write_text(json.dumps(data, indent=2), encoding='utf-8')
+    try:
+        path.write_text(json.dumps(data, indent=2), encoding='utf-8')
+    except OSError:
+        pass
 
 
 def hash_password(password: str) -> str:
@@ -119,17 +126,27 @@ def dashboard():
 
 
 def create_session(email: str) -> str:
-    sessions = load_json(SESSIONS_FILE)
-    token = uuid.uuid4().hex
-    sessions.append({'token': token, 'email': email})
-    save_json(SESSIONS_FILE, sessions)
-    return token
+    payload = urlsafe_b64encode(json.dumps({'email': email}).encode()).decode().rstrip('=')
+    signature = hmac.new(TOKEN_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()
+    return f'{payload}.{signature}'
 
 
 def get_user_from_token(token: str):
     sessions = load_json(SESSIONS_FILE)
     session = next((item for item in sessions if item.get('token') == token), None)
-    return session.get('email') if session else None
+    if session:
+        return session.get('email')
+
+    try:
+        payload, signature = token.split('.', 1)
+        expected = hmac.new(TOKEN_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(signature, expected):
+            return None
+        padded_payload = payload + '=' * (-len(payload) % 4)
+        email = json.loads(urlsafe_b64decode(padded_payload).decode()).get('email')
+        return email if isinstance(email, str) and is_valid_email(email) else None
+    except (ValueError, UnicodeDecodeError, json.JSONDecodeError):
+        return None
 
 
 @app.get('/')
