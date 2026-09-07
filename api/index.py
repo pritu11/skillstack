@@ -9,12 +9,20 @@ from datetime import datetime
 from pathlib import Path
 from flask import Flask, jsonify, request, send_from_directory
 
+try:
+    from supabase import create_client
+except ImportError:
+    create_client = None
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / 'data'
 USERS_FILE = DATA_DIR / 'users.json'
 LEADS_FILE = DATA_DIR / 'leads.json'
 SESSIONS_FILE = DATA_DIR / 'sessions.json'
 TOKEN_SECRET = os.environ.get('SKILLSTACK_TOKEN_SECRET', 'skillstack-demo-secret')
+SUPABASE_URL = os.environ.get('SUPABASE_URL')
+SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY) if create_client and SUPABASE_URL and SUPABASE_KEY else None
 
 DATA_DIR.mkdir(exist_ok=True)
 for file_path in (USERS_FILE, LEADS_FILE, SESSIONS_FILE):
@@ -36,6 +44,49 @@ def save_json(path: Path, data):
         path.write_text(json.dumps(data, indent=2), encoding='utf-8')
     except OSError:
         pass
+
+
+def database_users():
+    if supabase:
+        rows = supabase.table('users').select('email,password,created_at').execute().data
+        return [
+            {'email': row['email'], 'password': row['password'], 'createdAt': row['created_at']}
+            for row in rows
+        ]
+    return load_json(USERS_FILE)
+
+
+def database_add_user(user):
+    if supabase:
+        supabase.table('users').insert({
+            'email': user['email'],
+            'password': user['password'],
+            'created_at': user['createdAt']
+        }).execute()
+        return
+    save_json(USERS_FILE, load_json(USERS_FILE) + [user])
+
+
+def database_leads():
+    if supabase:
+        rows = supabase.table('leads').select('name,email,goal,created_at').order('created_at', desc=True).execute().data
+        return [
+            {'name': row['name'], 'email': row['email'], 'goal': row['goal'], 'createdAt': row['created_at']}
+            for row in rows
+        ]
+    return load_json(LEADS_FILE)
+
+
+def database_add_lead(lead_data):
+    if supabase:
+        supabase.table('leads').insert({
+            'name': lead_data['name'],
+            'email': lead_data['email'],
+            'goal': lead_data['goal'],
+            'created_at': lead_data['createdAt']
+        }).execute()
+        return
+    save_json(LEADS_FILE, load_json(LEADS_FILE) + [lead_data])
 
 
 def hash_password(password: str) -> str:
@@ -60,16 +111,16 @@ def signup():
     if not email or not is_valid_email(email) or len(password) < 4:
         return jsonify({"ok": False, "message": "Please provide a valid email and password"}), 400
 
-    users = load_json(USERS_FILE)
+    users = database_users()
     if any(user.get('email') == email for user in users):
         return jsonify({"ok": False, "message": "Email already exists"}), 409
 
-    users.append({
+    user = {
         'email': email,
         'password': hash_password(password),
         'createdAt': datetime.utcnow().isoformat() + 'Z'
-    })
-    save_json(USERS_FILE, users)
+    }
+    database_add_user(user)
     token = create_session(email)
     return jsonify({"ok": True, "token": token, "user": {"email": email}})
 
@@ -80,7 +131,7 @@ def login():
     email = (payload.get('email') or '').strip().lower()
     password = (payload.get('password') or '').strip()
 
-    users = load_json(USERS_FILE)
+    users = database_users()
     user = next((u for u in users if u.get('email') == email), None)
     if not user or user.get('password') != hash_password(password):
         return jsonify({"ok": False, "message": "Invalid email or password"}), 401
@@ -97,14 +148,13 @@ def lead():
         return jsonify({"ok": False, "message": "Login required"}), 401
 
     payload = request.get_json(silent=True) or {}
-    leads = load_json(LEADS_FILE)
-    leads.append({
+    lead_data = {
         'name': (payload.get('name') or 'Anonymous').strip(),
         'goal': (payload.get('goal') or 'General help').strip(),
         'email': (payload.get('email') or email).strip(),
         'createdAt': datetime.utcnow().isoformat() + 'Z'
-    })
-    save_json(LEADS_FILE, leads)
+    }
+    database_add_lead(lead_data)
     return jsonify({"ok": True, "message": "Your request has been saved"})
 
 
@@ -112,8 +162,8 @@ def lead():
 def dashboard():
     token = request.headers.get('Authorization', '').strip()
     email = get_user_from_token(token)
-    users = load_json(USERS_FILE)
-    leads = load_json(LEADS_FILE)
+    users = database_users()
+    leads = database_leads()
     return jsonify({
         'ok': True,
         'user': {'email': email} if email else None,
