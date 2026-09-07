@@ -1,15 +1,34 @@
 import hashlib
 import json
-import os
 import re
 import uuid
 from datetime import datetime
+from pathlib import Path
 from flask import Flask, jsonify, request, send_from_directory
 
-app = Flask(__name__, static_folder='..', static_url_path='')
+ROOT = Path(__file__).resolve().parent.parent
+DATA_DIR = ROOT / 'data'
+USERS_FILE = DATA_DIR / 'users.json'
+LEADS_FILE = DATA_DIR / 'leads.json'
+SESSIONS_FILE = DATA_DIR / 'sessions.json'
 
-# Simple in-memory store for demo purposes.
-DATA = {"users": [], "leads": []}
+DATA_DIR.mkdir(exist_ok=True)
+for file_path in (USERS_FILE, LEADS_FILE, SESSIONS_FILE):
+    if not file_path.exists():
+        file_path.write_text('[]', encoding='utf-8')
+
+app = Flask(__name__, static_folder=str(ROOT), static_url_path='')
+
+
+def load_json(path: Path):
+    try:
+        return json.loads(path.read_text(encoding='utf-8'))
+    except (OSError, json.JSONDecodeError):
+        return []
+
+
+def save_json(path: Path, data):
+    path.write_text(json.dumps(data, indent=2), encoding='utf-8')
 
 
 def hash_password(password: str) -> str:
@@ -34,15 +53,17 @@ def signup():
     if not email or not is_valid_email(email) or len(password) < 4:
         return jsonify({"ok": False, "message": "Please provide a valid email and password"}), 400
 
-    if any(user.get('email') == email for user in DATA['users']):
+    users = load_json(USERS_FILE)
+    if any(user.get('email') == email for user in users):
         return jsonify({"ok": False, "message": "Email already exists"}), 409
 
-    DATA['users'].append({
+    users.append({
         'email': email,
         'password': hash_password(password),
         'createdAt': datetime.utcnow().isoformat() + 'Z'
     })
-    token = uuid.uuid4().hex
+    save_json(USERS_FILE, users)
+    token = create_session(email)
     return jsonify({"ok": True, "token": token, "user": {"email": email}})
 
 
@@ -52,48 +73,70 @@ def login():
     email = (payload.get('email') or '').strip().lower()
     password = (payload.get('password') or '').strip()
 
-    user = next((u for u in DATA['users'] if u.get('email') == email), None)
+    users = load_json(USERS_FILE)
+    user = next((u for u in users if u.get('email') == email), None)
     if not user or user.get('password') != hash_password(password):
         return jsonify({"ok": False, "message": "Invalid email or password"}), 401
 
-    token = uuid.uuid4().hex
+    token = create_session(email)
     return jsonify({"ok": True, "token": token, "user": {"email": email}})
 
 
 @app.post('/api/lead')
 def lead():
-    token = request.headers.get('Authorization', '')
-    if not token:
+    token = (request.get_json(silent=True) or {}).get('token') or request.headers.get('Authorization', '')
+    email = get_user_from_token(token.strip())
+    if not email:
         return jsonify({"ok": False, "message": "Login required"}), 401
 
     payload = request.get_json(silent=True) or {}
-    DATA['leads'].append({
+    leads = load_json(LEADS_FILE)
+    leads.append({
         'name': (payload.get('name') or 'Anonymous').strip(),
         'goal': (payload.get('goal') or 'General help').strip(),
-        'email': (payload.get('email') or 'visitor@example.com').strip(),
+        'email': (payload.get('email') or email).strip(),
         'createdAt': datetime.utcnow().isoformat() + 'Z'
     })
+    save_json(LEADS_FILE, leads)
     return jsonify({"ok": True, "message": "Your request has been saved"})
 
 
 @app.get('/api/dashboard')
 def dashboard():
+    token = request.headers.get('Authorization', '').strip()
+    email = get_user_from_token(token)
+    users = load_json(USERS_FILE)
+    leads = load_json(LEADS_FILE)
     return jsonify({
         'ok': True,
-        'user': None,
+        'user': {'email': email} if email else None,
         'stats': {
-            'users': len(DATA['users']),
-            'leads': len(DATA['leads']),
-            'latest': DATA['leads'][-3:][::-1] if DATA['leads'] else []
+            'users': len(users),
+            'leads': len(leads),
+            'latest': leads[-3:][::-1] if leads else []
         }
     })
 
 
+def create_session(email: str) -> str:
+    sessions = load_json(SESSIONS_FILE)
+    token = uuid.uuid4().hex
+    sessions.append({'token': token, 'email': email})
+    save_json(SESSIONS_FILE, sessions)
+    return token
+
+
+def get_user_from_token(token: str):
+    sessions = load_json(SESSIONS_FILE)
+    session = next((item for item in sessions if item.get('token') == token), None)
+    return session.get('email') if session else None
+
+
 @app.get('/')
 def root():
-    return send_from_directory('..', 'index.html')
+    return send_from_directory(str(ROOT), 'index.html')
 
 
 @app.get('/<path:path>')
 def static_path(path):
-    return send_from_directory('..', path)
+    return send_from_directory(str(ROOT), path)
