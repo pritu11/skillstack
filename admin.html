@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin | SkillStack</title>
+    <style>
+      :root { --bg:#eef4f7; --surface:#ffffff; --ink:#102a43; --muted:#627d98; --line:#d9e2ec; --accent:#0f766e; --accent-dark:#115e59; --danger:#b42318; }
+      * { box-sizing:border-box; }
+      body { margin:0; color:var(--ink); background:linear-gradient(135deg,#e8f1f5,#f8fbfc); font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+      header { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:22px clamp(20px,5vw,64px); background:#102a43; color:#fff; }
+      header strong { font-size:1.25rem; letter-spacing:.03em; } header span { color:#b8d8d5; font-size:.9rem; }
+      main { width:min(1180px,calc(100% - 32px)); margin:32px auto 64px; }
+      .toolbar { display:flex; flex-wrap:wrap; align-items:end; gap:12px; padding:18px; background:var(--surface); border:1px solid var(--line); border-radius:10px; box-shadow:0 10px 30px #102a4310; }
+      label { display:grid; gap:6px; color:var(--muted); font-size:.82rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+      input { min-width:260px; padding:11px 12px; border:1px solid var(--line); border-radius:7px; color:var(--ink); background:#fbfdfe; font:inherit; }
+      button { border:0; border-radius:7px; padding:11px 15px; color:#fff; background:var(--accent); font:inherit; font-weight:700; cursor:pointer; } button:hover { background:var(--accent-dark); }
+      button.secondary { background:#e5eef2; color:var(--ink); } button.secondary:hover { background:#d5e3e8; }
+      #message { min-height:22px; margin:14px 2px; color:var(--danger); font-weight:600; }
+      .stats { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin:18px 0; }
+      .stat { padding:20px; background:var(--surface); border:1px solid var(--line); border-radius:10px; } .stat small { display:block; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; font-weight:700; } .stat strong { display:block; margin-top:6px; font-size:2rem; }
+      .panel { margin-top:18px; padding:18px; background:var(--surface); border:1px solid var(--line); border-radius:10px; overflow:auto; }
+      .panel-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; } h1,h2 { margin:0; } h1 { font-size:1.8rem; } h2 { font-size:1.1rem; }
+      table { width:100%; border-collapse:collapse; min-width:640px; } th,td { padding:11px 10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; } th { color:var(--muted); font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; } td { font-size:.92rem; }
+      .hidden { display:none; }
+      @media (max-width:640px) { header { align-items:flex-start; flex-direction:column; } main { width:min(100% - 20px,1180px); margin-top:20px; } .stats { grid-template-columns:1fr; } input { width:100%; min-width:0; } .toolbar label { width:100%; } .toolbar button { flex:1; } }
+    </style>
+  </head>
+  <body>
+    <header><strong>SkillStack Admin</strong><span>Operations dashboard</span></header>
+    <main>
+      <h1>Data overview</h1>
+      <div class="toolbar">
+        <label>Admin key<input id="adminKey" type="password" autocomplete="off" placeholder="Enter admin key" /></label>
+        <label>Search<input id="search" type="search" placeholder="Search email, name, or goal" /></label>
+        <button id="load" type="button">Load data</button>
+        <button id="export" class="secondary" type="button">Export CSV</button>
+      </div>
+      <div id="message" role="status"></div>
+      <section class="stats"><div class="stat"><small>Total users</small><strong id="userCount">0</strong></div><div class="stat"><small>Total leads</small><strong id="leadCount">0</strong></div></section>
+      <section class="panel"><div class="panel-head"><h2>Users</h2><span id="userShown"></span></div><table><thead><tr><th>Email</th><th>Created</th></tr></thead><tbody id="users"></tbody></table></section>
+      <section class="panel"><div class="panel-head"><h2>Leads</h2><span id="leadShown"></span></div><table><thead><tr><th>Name</th><th>Email</th><th>Goal</th><th>Created</th></tr></thead><tbody id="leads"></tbody></table></section>
+    </main>
+    <script>
+      const apiBase = window.location.protocol === 'file:' ? 'http://127.0.0.1:8000' : '';
+      const state = { users: [], leads: [] };
+      const adminKey = document.getElementById('adminKey');
+      const search = document.getElementById('search');
+      const message = document.getElementById('message');
+      const safe = (value) => String(value || '');
+      const cell = (value) => { const node = document.createElement('td'); node.textContent = safe(value); return node; };
+      function render() {
+        const query = search.value.trim().toLowerCase();
+        const users = state.users.filter(item => safe(item.email).toLowerCase().includes(query));
+        const leads = state.leads.filter(item => [item.name, item.email, item.goal].some(value => safe(value).toLowerCase().includes(query)));
+        const userBody = document.getElementById('users'); userBody.replaceChildren();
+        users.forEach(item => { const row = document.createElement('tr'); row.append(cell(item.email), cell(item.createdAt)); userBody.append(row); });
+        const leadBody = document.getElementById('leads'); leadBody.replaceChildren();
+        leads.forEach(item => { const row = document.createElement('tr'); row.append(cell(item.name), cell(item.email), cell(item.goal), cell(item.createdAt)); leadBody.append(row); });
+        document.getElementById('userCount').textContent = state.users.length; document.getElementById('leadCount').textContent = state.leads.length;
+        document.getElementById('userShown').textContent = `${users.length} shown`; document.getElementById('leadShown').textContent = `${leads.length} shown`;
+      }
+      async function loadData() {
+        message.textContent = '';
+        try {
+          const response = await fetch(`${apiBase}/api/admin/data`, { headers: { 'X-Admin-Key': adminKey.value.trim() } });
+          const data = await response.json();
+          if (!response.ok || !data.ok) throw new Error(data.message || `Request failed (${response.status})`);
+          state.users = data.users || []; state.leads = data.leads || []; render();
+        } catch (error) { message.textContent = error.message || 'Unable to load admin data'; }
+      }
+      function exportCsv() {
+        const rows = [['type','name','email','goal','createdAt'], ...state.users.map(item => ['user','',item.email,'',item.createdAt]), ...state.leads.map(item => ['lead',item.name,item.email,item.goal,item.createdAt])];
+        const csv = rows.map(row => row.map(value => `"${safe(value).replaceAll('"','""')}"`).join(',')).join('\n');
+        const link = document.createElement('a'); link.href = URL.createObjectURL(new Blob([csv], { type:'text/csv' })); link.download = 'skillstack-data.csv'; link.click(); URL.revokeObjectURL(link.href);
+      }
+      document.getElementById('load').addEventListener('click', loadData); document.getElementById('export').addEventListener('click', exportCsv); search.addEventListener('input', render); adminKey.addEventListener('keydown', event => { if (event.key === 'Enter') loadData(); });
+    </script>
+  </body>
+</html>

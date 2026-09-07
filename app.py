@@ -1,5 +1,6 @@
 import hashlib
 import json
+import os
 import re
 import uuid
 from datetime import datetime
@@ -12,6 +13,7 @@ DATA_DIR = ROOT / "data"
 USERS_FILE = DATA_DIR / "users.json"
 LEADS_FILE = DATA_DIR / "leads.json"
 SESSIONS_FILE = DATA_DIR / "sessions.json"
+ADMIN_KEY = os.environ.get("SKILLSTACK_ADMIN_KEY", "admin-demo-key")
 
 DATA_DIR.mkdir(exist_ok=True)
 for file_path in [USERS_FILE, LEADS_FILE, SESSIONS_FILE]:
@@ -50,6 +52,15 @@ class FreelanceHandler(BaseHTTPRequestHandler):
         if path == "/api/dashboard":
             token = self.headers.get("Authorization", "")
             self.send_json(self.get_dashboard(token))
+            return
+
+        if path == "/api/admin/data":
+            if self.headers.get("X-Admin-Key", "") != ADMIN_KEY:
+                self.send_json({"ok": False, "message": "Admin access required"}, 401)
+                return
+            users = load_json(USERS_FILE, [])
+            leads = load_json(LEADS_FILE, [])
+            self.send_json({"ok": True, "users": users, "leads": leads, "stats": {"users": len(users), "leads": len(leads)}})
             return
 
         self.serve_static(path)

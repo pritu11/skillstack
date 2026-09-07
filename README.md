@@ -31,3 +31,7 @@ Without these variables, local development uses the JSON files in `data/`. To re
 ```bash
 python3 seed_data.py
 ```
+
+## Admin dashboard
+
+Open `/admin.html`. Locally, use the default key `admin-demo-key`; for Vercel, set `SKILLSTACK_ADMIN_KEY` in the project environment variables before deploying.

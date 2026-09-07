@@ -20,6 +20,7 @@ USERS_FILE = DATA_DIR / 'users.json'
 LEADS_FILE = DATA_DIR / 'leads.json'
 SESSIONS_FILE = DATA_DIR / 'sessions.json'
 TOKEN_SECRET = os.environ.get('SKILLSTACK_TOKEN_SECRET', 'skillstack-demo-secret')
+ADMIN_KEY = os.environ.get('SKILLSTACK_ADMIN_KEY')
 SUPABASE_URL = os.environ.get('SUPABASE_URL')
 SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY) if create_client and SUPABASE_URL and SUPABASE_KEY else None
@@ -172,6 +173,21 @@ def dashboard():
             'leads': len(leads),
             'latest': leads[-3:][::-1] if leads else []
         }
+    })
+
+
+@app.get('/api/admin/data')
+def admin_data():
+    if not ADMIN_KEY or not hmac.compare_digest(request.headers.get('X-Admin-Key', ''), ADMIN_KEY):
+        return jsonify({'ok': False, 'message': 'Admin access required'}), 401
+
+    users = database_users()
+    leads = database_leads()
+    return jsonify({
+        'ok': True,
+        'users': users,
+        'leads': leads,
+        'stats': {'users': len(users), 'leads': len(leads)}
     })
 
 
