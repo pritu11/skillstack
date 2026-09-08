@@ -70,6 +70,8 @@
       .feature-title { font-weight: 800; margin: 0 0 6px; }
       .feature-list { margin: 0; padding-left: 18px; color: var(--muted); }
       .feature-list li { margin-bottom: 4px; }
+      .live-source { margin: 6px 0 0; color: var(--muted); font-size: 0.86rem; }
+      .live-source a { color: var(--accent); }
       .muted { color: var(--muted); }
       .input, select { width: 100%; padding: 12px 13px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); color: var(--text); }
       .result-list { display: grid; gap: 10px; margin-top: 10px; }
@@ -184,6 +186,8 @@
       const skillInput = document.getElementById('skillInput');
       const themeToggle = document.getElementById('themeToggle');
       const backBtn = document.getElementById('backBtn');
+      const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+      const safeExternalUrl = (value) => /^https:\/\//i.test(value || '') ? value : '#';
 
       if (backBtn) {
         backBtn.addEventListener('click', () => {
@@ -334,7 +338,7 @@
         }));
       }
 
-      function renderRecommendedTools(skill) {
+      function renderRecommendedTools(skill, liveData = null) {
         const cards = getRecommendedTools(skill);
         const hasMeaningfulInput = Boolean((skill || '').trim() && (skill || '').trim().length >= 3);
         if (!cards || !hasMeaningfulInput) {
@@ -343,15 +347,71 @@
           return;
         }
 
-        recommendedTools.innerHTML = cards.map((card) => `
+        const liveCards = liveData && liveData.length ? [{ title: 'Live resources for your skill', tools: liveData }] : [];
+        recommendedTools.innerHTML = [...liveCards, ...cards].map((card) => `
           <div class="feature-card">
-            <h3 class="feature-title">${card.title}</h3>
+            <h3 class="feature-title">${escapeHtml(card.title)}</h3>
             <ul class="feature-list">
-              ${card.tools.map((tool) => `<li>${tool}</li>`).join('')}
+              ${card.tools.map((tool) => {
+                if (typeof tool === 'object') {
+                  return `<li><a href="${safeExternalUrl(tool.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(tool.label)}</a>${tool.detail ? `: ${escapeHtml(tool.detail)}` : ''}</li>`;
+                }
+                return `<li>${escapeHtml(tool)}</li>`;
+              }).join('')}
             </ul>
           </div>
         `).join('');
         featureSection.classList.remove('hidden');
+      }
+
+      let suggestionRequest = 0;
+      let suggestionTimer;
+      let suggestionController;
+      async function fetchLiveSuggestions(skill) {
+        const value = skill.trim();
+        if (value.length < 3) {
+          suggestionRequest += 1;
+          if (suggestionController) suggestionController.abort();
+          renderRecommendedTools(value);
+          return;
+        }
+        const requestId = ++suggestionRequest;
+        if (suggestionController) suggestionController.abort();
+        suggestionController = new AbortController();
+        const timeout = setTimeout(() => suggestionController.abort(), 7000);
+        renderRecommendedTools(value);
+        try {
+          const query = encodeURIComponent(value);
+          const [githubResponse, wikipediaResponse] = await Promise.all([
+            fetch(`https://api.github.com/search/repositories?q=${query}&sort=stars&order=desc&per_page=5`, { signal: suggestionController.signal }),
+            fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(value.replace(/\s+/g, '_'))}`, { signal: suggestionController.signal })
+          ]);
+          const resources = [];
+          if (githubResponse.ok) {
+            const github = await githubResponse.json();
+            (github.items || []).slice(0, 5).forEach((repo) => {
+              resources.push({ label: repo.full_name, url: repo.html_url, detail: `${Number(repo.stargazers_count || 0).toLocaleString()} stars` });
+            });
+          }
+          if (wikipediaResponse.ok) {
+            const wikipedia = await wikipediaResponse.json();
+            if (wikipedia.extract) {
+              resources.unshift({ label: wikipedia.title || value, url: wikipedia.content_urls?.desktop?.page, detail: `${wikipedia.extract.slice(0, 180)}${wikipedia.extract.length > 180 ? '...' : ''}` });
+            }
+          }
+          if (requestId === suggestionRequest) {
+            renderRecommendedTools(value, resources);
+          }
+        } catch (error) {
+          if (requestId === suggestionRequest) renderRecommendedTools(value);
+        } finally {
+          clearTimeout(timeout);
+        }
+      }
+
+      function loadLiveSuggestions(skill) {
+        clearTimeout(suggestionTimer);
+        suggestionTimer = setTimeout(() => fetchLiveSuggestions(skill), 250);
       }
 
       function buildRoadmap(skill, goal, level) {
@@ -374,18 +434,19 @@
           `Phase 5: Reach out to 10 potential clients, start a conversation, and offer one small entry-level project.`,
           `Phase 6: Deliver your first result, collect feedback, improve your process, and repeat weekly.`
         ];
-        return { skillName, goalText, levelText, steps, deepPlan, action: `Spend 45 minutes each day on practice, learning tools, and outreach for ${skillName}.` };
+        return { skillName, goalText, levelText, steps, deepPlan, action: `Spend 45 minutes each day on practice, learning tools, and outreach for ${skillName}.`, createdAt: new Date().toLocaleDateString() };
       }
 
       function renderRoadmap(roadmap) {
         roadmapResult.innerHTML = `
           <h3 style="margin-top:0">Your roadmap</h3>
           <div class="result-list">
-            <div class="result-item"><strong>Skill</strong><span>${roadmap.skillName}</span></div>
-            <div class="result-item"><strong>Goal</strong><span>${roadmap.goalText}</span></div>
-            <div class="result-item"><strong>Action plan</strong><span>${roadmap.steps.map((step, index) => `<div style="margin-top:4px">${index + 1}. ${step}</div>`).join('')}</span></div>
-            <div class="result-item"><strong>Deep plan</strong><span>${roadmap.deepPlan.map((step, index) => `<div style="margin-top:4px">${index + 1}. ${step}</div>`).join('')}</span></div>
-            <div class="result-item"><strong>Daily action</strong><span>${roadmap.action}</span></div>
+            <div class="result-item"><strong>Skill</strong><span>${escapeHtml(roadmap.skillName)}</span></div>
+            <div class="result-item"><strong>Goal</strong><span>${escapeHtml(roadmap.goalText)}</span></div>
+            <div class="result-item"><strong>Level</strong><span>${escapeHtml(roadmap.levelText)}</span></div>
+            <div class="result-item"><strong>Action plan</strong><span>${roadmap.steps.map((step, index) => `<div style="margin-top:4px">${index + 1}. ${escapeHtml(step)}</div>`).join('')}</span></div>
+            <div class="result-item"><strong>Deep plan</strong><span>${roadmap.deepPlan.map((step, index) => `<div style="margin-top:4px">${index + 1}. ${escapeHtml(step)}</div>`).join('')}</span></div>
+            <div class="result-item"><strong>Daily action</strong><span>${escapeHtml(roadmap.action)}</span></div>
             <button class="btn btn-secondary" id="downloadPdfBtn" type="button">Save as PDF</button>
           </div>
         `;
@@ -393,19 +454,21 @@
           const printArea = document.getElementById('printArea');
           printArea.innerHTML = `
             <h1>SkillToFreelancer Roadmap</h1>
-            <p><strong>Skill:</strong> ${roadmap.skillName}</p>
-            <p><strong>Goal:</strong> ${roadmap.goalText}</p>
+            <p><strong>Created:</strong> ${escapeHtml(roadmap.createdAt)}</p>
+            <p><strong>Skill:</strong> ${escapeHtml(roadmap.skillName)}</p>
+            <p><strong>Goal:</strong> ${escapeHtml(roadmap.goalText)}</p>
+            <p><strong>Level:</strong> ${escapeHtml(roadmap.levelText)}</p>
             <h3>Action plan</h3>
-            <ol>${roadmap.steps.map((step) => `<li>${step}</li>`).join('')}</ol>
+            <ol>${roadmap.steps.map((step) => `<li>${escapeHtml(step)}</li>`).join('')}</ol>
             <h3>Deep plan</h3>
-            <ol>${roadmap.deepPlan.map((step) => `<li>${step}</li>`).join('')}</ol>
-            <p><strong>Daily action:</strong> ${roadmap.action}</p>
+            <ol>${roadmap.deepPlan.map((step) => `<li>${escapeHtml(step)}</li>`).join('')}</ol>
+            <p><strong>Daily action:</strong> ${escapeHtml(roadmap.action)}</p>
           `;
           window.print();
         });
       }
 
-      skillInput.addEventListener('input', () => renderRecommendedTools(skillInput.value));
+      skillInput.addEventListener('input', () => loadLiveSuggestions(skillInput.value));
       renderRecommendedTools(skillInput.value);
 
       roadmapForm.addEventListener('submit', (event) => {

@@ -5,9 +5,10 @@ import os
 import re
 import uuid
 from base64 import urlsafe_b64decode, urlsafe_b64encode
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from flask import Flask, jsonify, request, send_from_directory
+from werkzeug.security import check_password_hash, generate_password_hash
 
 try:
     from supabase import create_client
@@ -20,10 +21,13 @@ USERS_FILE = DATA_DIR / 'users.json'
 LEADS_FILE = DATA_DIR / 'leads.json'
 SESSIONS_FILE = DATA_DIR / 'sessions.json'
 TOKEN_SECRET = os.environ.get('SKILLSTACK_TOKEN_SECRET', 'skillstack-demo-secret')
-ADMIN_KEY = os.environ.get('SKILLSTACK_ADMIN_KEY')
+ADMIN_KEY = os.environ.get('SKILLSTACK_ADMIN_KEY', 'admin-demo-key')
 SUPABASE_URL = os.environ.get('SUPABASE_URL')
 SUPABASE_KEY = os.environ.get('SUPABASE_KEY')
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY) if create_client and SUPABASE_URL and SUPABASE_KEY else None
+try:
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY) if create_client and SUPABASE_URL and SUPABASE_KEY else None
+except Exception:
+    supabase = None
 
 DATA_DIR.mkdir(exist_ok=True)
 for file_path in (USERS_FILE, LEADS_FILE, SESSIONS_FILE):
@@ -31,6 +35,16 @@ for file_path in (USERS_FILE, LEADS_FILE, SESSIONS_FILE):
         file_path.write_text('[]', encoding='utf-8')
 
 app = Flask(__name__, static_folder=str(ROOT), static_url_path='')
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024
+
+
+@app.after_request
+def add_security_headers(response):
+    response.headers.setdefault('X-Content-Type-Options', 'nosniff')
+    response.headers.setdefault('X-Frame-Options', 'DENY')
+    response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
+    response.headers.setdefault('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+    return response
 
 
 def load_json(path: Path):
@@ -49,32 +63,35 @@ def save_json(path: Path, data):
 
 def database_users():
     if supabase:
-        rows = supabase.table('users').select('email,password,created_at').execute().data
-        return [
-            {'email': row['email'], 'password': row['password'], 'createdAt': row['created_at']}
-            for row in rows
-        ]
+        try:
+            rows = supabase.table('users').select('email,password,created_at').execute().data or []
+            return [{'email': row['email'], 'password': row['password'], 'createdAt': row['created_at']} for row in rows]
+        except Exception:
+            pass
     return load_json(USERS_FILE)
 
 
 def database_add_user(user):
     if supabase:
-        supabase.table('users').insert({
-            'email': user['email'],
-            'password': user['password'],
-            'created_at': user['createdAt']
-        }).execute()
-        return
+        try:
+            supabase.table('users').insert({
+                'email': user['email'],
+                'password': user['password'],
+                'created_at': user['createdAt']
+            }).execute()
+            return
+        except Exception:
+            pass
     save_json(USERS_FILE, load_json(USERS_FILE) + [user])
 
 
 def database_leads():
     if supabase:
-        rows = supabase.table('leads').select('name,email,goal,created_at').order('created_at', desc=True).execute().data
-        return [
-            {'name': row['name'], 'email': row['email'], 'goal': row['goal'], 'createdAt': row['created_at']}
-            for row in rows
-        ]
+        try:
+            rows = supabase.table('leads').select('name,email,goal,created_at').order('created_at', desc=True).execute().data or []
+            return [{'name': row['name'], 'email': row['email'], 'goal': row['goal'], 'createdAt': row['created_at']} for row in rows]
+        except Exception:
+            pass
     return load_json(LEADS_FILE)
 
 
@@ -91,7 +108,14 @@ def database_add_lead(lead_data):
 
 
 def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+    return generate_password_hash(password)
+
+
+def password_matches(stored_password: str, password: str) -> bool:
+    if stored_password.startswith(('pbkdf2:', 'scrypt:')):
+        return check_password_hash(stored_password, password)
+    legacy_hash = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    return hmac.compare_digest(stored_password, legacy_hash)
 
 
 def is_valid_email(email: str) -> bool:
@@ -109,7 +133,7 @@ def signup():
     email = (payload.get('email') or '').strip().lower()
     password = (payload.get('password') or '').strip()
 
-    if not email or not is_valid_email(email) or len(password) < 4:
+    if not email or not is_valid_email(email) or len(password) < 8:
         return jsonify({"ok": False, "message": "Please provide a valid email and password"}), 400
 
     users = database_users()
@@ -134,8 +158,12 @@ def login():
 
     users = database_users()
     user = next((u for u in users if u.get('email') == email), None)
-    if not user or user.get('password') != hash_password(password):
+    if not user or not password_matches(user.get('password', ''), password):
         return jsonify({"ok": False, "message": "Invalid email or password"}), 401
+
+    if not user.get('password', '').startswith(('pbkdf2:', 'scrypt:')):
+        user['password'] = hash_password(password)
+        save_json(USERS_FILE, [user if item.get('email') == email else item for item in users])
 
     token = create_session(email)
     return jsonify({"ok": True, "token": token, "user": {"email": email}})
@@ -143,16 +171,16 @@ def login():
 
 @app.post('/api/lead')
 def lead():
-    token = (request.get_json(silent=True) or {}).get('token') or request.headers.get('Authorization', '')
+    payload = request.get_json(silent=True) or {}
+    token = payload.get('token') or request.headers.get('Authorization', '')
     email = get_user_from_token(token.strip())
     if not email:
         return jsonify({"ok": False, "message": "Login required"}), 401
 
-    payload = request.get_json(silent=True) or {}
     lead_data = {
-        'name': (payload.get('name') or 'Anonymous').strip(),
-        'goal': (payload.get('goal') or 'General help').strip(),
-        'email': (payload.get('email') or email).strip(),
+        'name': (payload.get('name') or 'Anonymous').strip()[:120],
+        'goal': (payload.get('goal') or 'General help').strip()[:500],
+        'email': email,
         'createdAt': datetime.utcnow().isoformat() + 'Z'
     }
     database_add_lead(lead_data)
@@ -163,6 +191,8 @@ def lead():
 def dashboard():
     token = request.headers.get('Authorization', '').strip()
     email = get_user_from_token(token)
+    if not email:
+        return jsonify({'ok': False, 'message': 'Login required'}), 401
     users = database_users()
     leads = database_leads()
     return jsonify({
@@ -192,7 +222,8 @@ def admin_data():
 
 
 def create_session(email: str) -> str:
-    payload = urlsafe_b64encode(json.dumps({'email': email}).encode()).decode().rstrip('=')
+    expires_at = int((datetime.now(timezone.utc) + timedelta(days=7)).timestamp())
+    payload = urlsafe_b64encode(json.dumps({'email': email, 'exp': expires_at}).encode()).decode().rstrip('=')
     signature = hmac.new(TOKEN_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()
     return f'{payload}.{signature}'
 
@@ -209,7 +240,10 @@ def get_user_from_token(token: str):
         if not hmac.compare_digest(signature, expected):
             return None
         padded_payload = payload + '=' * (-len(payload) % 4)
-        email = json.loads(urlsafe_b64decode(padded_payload).decode()).get('email')
+        session_data = json.loads(urlsafe_b64decode(padded_payload).decode())
+        if session_data.get('exp', 0) < datetime.now(timezone.utc).timestamp():
+            return None
+        email = session_data.get('email')
         return email if isinstance(email, str) and is_valid_email(email) else None
     except (ValueError, UnicodeDecodeError, json.JSONDecodeError):
         return None
