@@ -44,6 +44,10 @@ def add_security_headers(response):
     response.headers.setdefault('X-Frame-Options', 'DENY')
     response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
     response.headers.setdefault('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+    response.headers.setdefault('Content-Security-Policy', "default-src 'self'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'")
+    response.headers.setdefault('Cross-Origin-Resource-Policy', 'same-origin')
+    response.headers.setdefault('Cache-Control', 'no-store')
+    response.headers.setdefault('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
     return response
 
 
@@ -225,14 +229,32 @@ def create_session(email: str) -> str:
     expires_at = int((datetime.now(timezone.utc) + timedelta(days=7)).timestamp())
     payload = urlsafe_b64encode(json.dumps({'email': email, 'exp': expires_at}).encode()).decode().rstrip('=')
     signature = hmac.new(TOKEN_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()
-    return f'{payload}.{signature}'
+    token = f'{payload}.{signature}'
+
+    sessions = load_json(SESSIONS_FILE)
+    sessions.append({
+        'token': token,
+        'email': email,
+        'createdAt': datetime.utcnow().isoformat() + 'Z',
+        'expiresAt': expires_at,
+    })
+    save_json(SESSIONS_FILE, sessions)
+    return token
 
 
 def get_user_from_token(token: str):
     sessions = load_json(SESSIONS_FILE)
     session = next((item for item in sessions if item.get('token') == token), None)
     if session:
-        return session.get('email')
+        expires_at = session.get('expiresAt')
+        try:
+            if isinstance(expires_at, (int, float)) and expires_at < datetime.now(timezone.utc).timestamp():
+                return None
+        except Exception:
+            pass
+        email = session.get('email')
+        if isinstance(email, str) and is_valid_email(email):
+            return email
 
     try:
         payload, signature = token.split('.', 1)
