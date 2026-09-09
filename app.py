@@ -1,4 +1,5 @@
 import hashlib
+import hmac
 import json
 import os
 import re
@@ -7,6 +8,9 @@ from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
+
+MAX_BODY_LENGTH = 16 * 1024
+TOKEN_SECRET = os.environ.get("SKILLSTACK_TOKEN_SECRET", "skillstack-demo-secret")
 
 ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
@@ -36,6 +40,20 @@ def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode("utf-8")).hexdigest()
 
 
+def compare_digest(left, right):
+    try:
+        return hmac.compare_digest(str(left), str(right))
+    except Exception:
+        return False
+
+
+def password_matches(stored_password: str, password: str) -> bool:
+    if stored_password and stored_password.startswith("pbkdf2:"):
+        return False
+    legacy_hash = hashlib.sha256(password.encode("utf-8")).hexdigest()
+    return compare_digest(stored_password, legacy_hash)
+
+
 def is_valid_email(email: str) -> bool:
     return bool(re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email))
 
@@ -50,12 +68,17 @@ class FreelanceHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/dashboard":
-            token = self.headers.get("Authorization", "")
+            token = self.headers.get("Authorization", "").strip()
+            email = self.get_user_from_token(token)
+            if not email:
+                self.send_json({"ok": False, "message": "Login required"}, 401)
+                return
             self.send_json(self.get_dashboard(token))
             return
 
         if path == "/api/admin/data":
-            if self.headers.get("X-Admin-Key", "") != ADMIN_KEY:
+            provided_key = self.headers.get("X-Admin-Key", "")
+            if not ADMIN_KEY or not hmac.compare_digest(provided_key, ADMIN_KEY):
                 self.send_json({"ok": False, "message": "Admin access required"}, 401)
                 return
             users = load_json(USERS_FILE, [])
@@ -68,11 +91,25 @@ class FreelanceHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         parsed = urlparse(self.path)
         path = parsed.path
-        length = int(self.headers.get("Content-Length", "0"))
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            length = 0
+
+        if length > MAX_BODY_LENGTH:
+            self.send_json({"ok": False, "message": "Payload too large"}, 413)
+            return
+
         body = self.rfile.read(length).decode("utf-8") if length else "{}"
+
+        if not self.headers.get("Content-Type", "").startswith("application/json"):
+            self.send_json({"ok": False, "message": "Content-Type must be application/json"}, 415)
+            return
 
         try:
             payload = json.loads(body) if body else {}
+            if not isinstance(payload, dict):
+                raise json.JSONDecodeError("payload must be an object", body, 0)
         except json.JSONDecodeError:
             self.send_json({"ok": False, "message": "Invalid JSON"}, 400)
             return
@@ -103,6 +140,8 @@ class FreelanceHandler(BaseHTTPRequestHandler):
             ext = safe_path.suffix.lower()
             mime = "text/html" if ext == ".html" else "application/javascript" if ext == ".js" else "text/css" if ext == ".css" else "application/octet-stream"
             self.send_response(200)
+            for header, value in self.security_headers().items():
+                self.send_header(header, value)
             self.send_header("Content-Type", mime)
             self.send_header("Content-Length", str(len(content)))
             self.end_headers()
@@ -110,9 +149,21 @@ class FreelanceHandler(BaseHTTPRequestHandler):
         else:
             self.send_json({"ok": False, "message": "Not found"}, 404)
 
+    def security_headers(self):
+        return {
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "DENY",
+            "Referrer-Policy": "strict-origin-when-cross-origin",
+            "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+            "Content-Security-Policy": "default-src 'self'; object-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'",
+            "Cache-Control": "no-store",
+        }
+
     def send_json(self, data, status=200):
         body = json.dumps(data).encode("utf-8")
         self.send_response(status)
+        for header, value in self.security_headers().items():
+            self.send_header(header, value)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
@@ -147,7 +198,7 @@ class FreelanceHandler(BaseHTTPRequestHandler):
         users = load_json(USERS_FILE, [])
         user = next((u for u in users if u.get("email") == email), None)
 
-        if not user or user.get("password") != hash_password(password):
+        if not user or not password_matches(user.get("password", ""), password):
             self.send_json({"ok": False, "message": "Invalid email or password"}, 401)
             return
 
@@ -181,8 +232,10 @@ class FreelanceHandler(BaseHTTPRequestHandler):
     def get_user_from_token(self, token: str):
         sessions = load_json(SESSIONS_FILE, [])
         for session in sessions:
-            if session.get("token") == token:
-                return session.get("email")
+            if isinstance(session, dict) and session.get("token") == token:
+                email = session.get("email")
+                if isinstance(email, str) and is_valid_email(email):
+                    return email
         return None
 
     def get_dashboard(self, token: str):
