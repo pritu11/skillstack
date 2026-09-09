@@ -1,7 +1,14 @@
 import unittest
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import app
+
+
+class TestLoginNav(unittest.TestCase):
+    def test_login_page_has_no_roadmap_navigation_link(self):
+        content = Path("login.html").read_text(encoding="utf-8")
+        self.assertNotIn('<a href="roadmap.html">Roadmap</a>', content)
 
 
 class TestSecurityHeaders(unittest.TestCase):
